@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.6)
+project(projects-cpp)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+add_subdirectory(multithreading_odd_even_print)
