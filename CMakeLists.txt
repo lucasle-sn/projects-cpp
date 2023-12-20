@@ -4,5 +4,6 @@ project(projects-cpp)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+add_subdirectory(coding_problems)
 add_subdirectory(multithreading_interrupt)
 add_subdirectory(multithreading_odd_even_print)
