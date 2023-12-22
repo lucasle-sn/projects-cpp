@@ -6,10 +6,10 @@
 
 /**
  * @brief Check if a number is Amstrong number
- * 
+ *
  * An Amstrong number is a number that is equal sum of each digit powered by the
- * number of digits. For example: [abc = a^3 + b^3 + c^3] [abcd = a^4 + b^4 +
- * c^4 + d^4]
+ * number of digits.
+ * For example: [abc = a^3 + b^3 + c^3] [abcd = a^4 + b^4 + c^4 + d^4]
  *
  * @param number Number that need checked
  * @return bool
