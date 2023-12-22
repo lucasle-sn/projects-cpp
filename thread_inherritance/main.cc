@@ -1,10 +1,16 @@
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <memory>
 #include <thread>
-#include <vector>
+
+/**
+ * @brief Default sleep duration of thread
+ *
+ */
+static constexpr uint8_t cThreadSleepDuration{2};
 
 /**
  * @brief Base class defining Thread
@@ -57,7 +63,8 @@ class ThreadA : public Thread {
    */
   void run() override {
     for (size_t i = 0; i < 10; i++) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(2));
+      std::this_thread::sleep_for(
+          std::chrono::milliseconds(cThreadSleepDuration));
       printf("Thread A%zu\n", i);
     }
   }
@@ -73,17 +80,18 @@ class ThreadB : public Thread {
    */
   void run() override {
     for (size_t i = 0; i < 10; i++) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(2));
+      std::this_thread::sleep_for(
+          std::chrono::milliseconds(cThreadSleepDuration));
       printf("Thread B%zu\n", i);
     }
   }
 };
 
 int main() {
-  std::vector<std::unique_ptr<Thread>> objects;
+  std::array<std::unique_ptr<Thread>, 2> objects;
 
-  objects.push_back(std::make_unique<ThreadA>());
-  objects.push_back(std::make_unique<ThreadB>());
+  objects.at(0) = std::make_unique<ThreadA>();
+  objects.at(1) = std::make_unique<ThreadB>();
 
   for (auto &obj : objects) {
     obj->init();
