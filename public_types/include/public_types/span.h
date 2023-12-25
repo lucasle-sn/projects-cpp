@@ -67,7 +67,7 @@ class Span {
    * @param index Index
    * @return T&
    */
-  T &at(std::size_t index) const {return data[index]};
+  T &at(std::size_t index) const { return data[index]; }
 
   /**
    * @brief Get span size
