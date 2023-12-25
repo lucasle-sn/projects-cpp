@@ -7,6 +7,11 @@
 #include <cstring>
 
 /**
+ * This program checks if a code is HEX string. A HEX string is in form of
+ * [#<hex-characters>]
+ */
+
+/**
  * @brief Size of HEX characters
  */
 static constexpr size_t cHexCharSize{16};
