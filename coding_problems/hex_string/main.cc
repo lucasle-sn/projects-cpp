@@ -34,10 +34,7 @@ template <size_t N>
 bool in_character_set(const char ch,
                       const std::array<const char, N> character_set) {
   auto it = std::find(character_set.begin(), character_set.end(), ch);
-  if (it == character_set.end()) {
-    return false;
-  }
-  return true;
+  return (it != character_set.end());
 }
 
 /**
@@ -51,7 +48,7 @@ bool in_character_set(const char ch,
 template <size_t N>
 bool in_character_set(const char *text,
                       const std::array<const char, N> character_set) {
-  // If text is invalid if it is empty
+  // Text is invalid if it is empty
   if ((text == nullptr) || (strlen(text) == 0)) {
     return false;
   }
@@ -65,6 +62,7 @@ bool in_character_set(const char *text,
 }
 
 bool is_hex_code(const char *text) {
+  // Text is invalid if it is empty
   if ((text == nullptr) || (strlen(text) == 0)) {
     return false;
   }
