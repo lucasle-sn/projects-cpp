@@ -1,3 +1,6 @@
+#ifndef PUBLIC_TYPES_SPAN_H
+#define PUBLIC_TYPES_SPAN_H
+
 #include <cstddef>
 
 namespace unimelb {
@@ -99,3 +102,5 @@ class Span {
 };
 
 }  // namespace unimelb
+
+#endif  // PUBLIC_TYPES_SPAN_H
