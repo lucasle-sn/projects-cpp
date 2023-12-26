@@ -1,4 +1,7 @@
 #include <cstddef>
+
+namespace unimelb {
+
 /**
  * @brief Span library
  *
@@ -94,3 +97,5 @@ class Span {
    */
   std::size_t size;
 };
+
+}  // namespace unimelb
