@@ -11,5 +11,4 @@ add_subdirectory(coding_problems)
 add_subdirectory(multithreading_interrupt)
 add_subdirectory(multithreading_odd_even_print)
 add_subdirectory(thread_inherritance)
-
 add_subdirectory(public_types)
