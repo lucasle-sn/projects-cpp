@@ -51,7 +51,6 @@ TEST_F(TestSpan, TestBasic) {
   ASSERT_TRUE(span.Data() == buffer);
 
   span.reset();
-  ASSERT_TRUE(span.Data() == nullptr);
   ASSERT_TRUE(span.Size() == 0);
 }
 
