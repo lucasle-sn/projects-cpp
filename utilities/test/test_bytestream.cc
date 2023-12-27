@@ -8,14 +8,21 @@ namespace {
 
 class TestBytestream : public ::testing::Test {
  protected:
+  /**
+   * @brief Assert Bytestream::get() with various output types
+   *
+   * @tparam T
+   * @param endianess Bytestream endianess
+   */
   template <typename T>
   void assert_get_types(
       unimelb::Endianess endianess = unimelb::Endianess::BIG_END) {
     // use a fix buffer
     uint8_t buffer[]{0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
     size_t buffer_len = sizeof(buffer) / sizeof(buffer[0]);
-
+    // Equivalent buffer memory in Big Endian
     const uint64_t cBufferU64BE{0x0123456789ABCDEF};
+    // Equivalent buffer memory in Little Endian
     const uint64_t cBufferU64LE{0xEFCDAB8967452301};
 
     Bytestream bs(buffer, buffer_len, endianess);
@@ -53,6 +60,9 @@ class TestBytestream : public ::testing::Test {
   }
 };
 
+/**
+ * @brief Test funcdamental functions of Bytestream class
+ */
 TEST_F(TestBytestream, TestBasic) {
   uint8_t buffer[]{0x00, 0x01, 0x02, 0x03};
   size_t buffer_len = sizeof(buffer) / sizeof(buffer[0]);
@@ -71,6 +81,9 @@ TEST_F(TestBytestream, TestBasic) {
   ASSERT_TRUE(!bs.is_overflow(buffer_len));  // Suppose to return overflow
 }
 
+/**
+ * @brief Test Bytestream::get() with various output types
+ */
 TEST_F(TestBytestream, TestGetVariousTypes) {
   // Endiness::BIG_END
   assert_get_types<uint8_t>();

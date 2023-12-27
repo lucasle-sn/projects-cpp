@@ -1,5 +1,5 @@
-#ifndef INTERNAL_TYPES_BYTESTREAM_H
-#define INTERNAL_TYPES_BYTESTREAM_H
+#ifndef UTILITIES_BYTESTREAM_H
+#define UTILITIES_BYTESTREAM_H
 
 #include <public_types/span.h>
 #include <cstddef>
@@ -187,4 +187,4 @@ class Bytestream {
 
 }  // namespace unimelb
 
-#endif  // INTERNAL_TYPES_BYTESTREAM_H
+#endif  // UTILITIES_BYTESTREAM_H
