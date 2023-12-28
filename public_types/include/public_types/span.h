@@ -54,10 +54,7 @@ class Span {
   /**
    * @brief Reset span object
    */
-  void reset() {
-    data = nullptr;
-    size = 0;
-  }
+  void reset() { size = 0; }
 
   /**
    * @brief Element access

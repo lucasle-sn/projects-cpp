@@ -9,3 +9,4 @@ add_subdirectory(third_party/gtest)
 
 add_subdirectory(coding_problems)
 add_subdirectory(public_types)
+add_subdirectory(utilities)
