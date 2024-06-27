@@ -1,5 +1,6 @@
 add_library(tcp 
   src/server.cc
+  src/client.cc
 )
 
 target_include_directories(tcp
