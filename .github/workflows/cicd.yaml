@@ -27,5 +27,5 @@ jobs:
       - name: Test
         run: make do-all-unit-tests
 
-      - name: doxygen
-        run: make gen-doxygen
+      # - name: doxygen
+      #   run: cmake --build build --target doxygen -- --no-print-directory
