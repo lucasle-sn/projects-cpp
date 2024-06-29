@@ -5,6 +5,7 @@ target_include_directories(public-types
 )
 
 add_executable(unit-test-public-types
+  test/test_log.cc
   test/test_span.cc
 )
 

@@ -1,12 +1,12 @@
 #ifndef PUBLIC_TYPES_LOG_H
 #define PUBLIC_TYPES_LOG_H
 
-namespace unimelb {
-
 #include <cstdio>
 #include <memory>
 #include <mutex>
 #include <thread>
+
+namespace unimelb {
 
 /**
  * @brief Logger class
@@ -14,34 +14,34 @@ namespace unimelb {
 class Logger {
  public:
   /**
-   * @brief LogLevel enum class
+   * @brief LogLevel enum
    */
-  enum class LogLevel { INFO, WARNING, ERROR };
+  enum LogLevel { INFO = 0, WARNING, ERROR };
 
   /**
    * @brief Constructor deleted
    */
-  Logger() = default;
+  Logger() = delete;
 
   /**
    * @brief Copy constructor deleted
    */
-  Logger(const Logger &) = default;
+  Logger(const Logger &) = delete;
 
   /**
    * @brief Move constructor deleted
    */
-  Logger(Logger &&) = default;
+  Logger(Logger &&) = delete;
 
   /**
    * @brief Copy assignment deleted
    */
-  Logger &operator=(const Logger &) = default;
+  Logger &operator=(const Logger &) = delete;
 
   /**
    * @brief Move assignment deleted
    */
-  Logger &operator=(Logger &&) = default;
+  Logger &operator=(Logger &&) = delete;
 
   /**
    * @brief Constructor
@@ -51,6 +51,11 @@ class Logger {
    */
   explicit Logger(const char *loggerName, LogLevel level = LogLevel::INFO)
       : loggerName_(loggerName), logLevel_(level) {}
+
+  /**
+   * @brief Destructor
+   */
+  ~Logger() = default;
 
   /**
    * @brief Log info
@@ -90,10 +95,10 @@ class Logger {
     snprintf(logMessage, sizeof(logMessage), "[%s] %s: %s",
              logLevelToString(level), loggerName_, message);
 
-    if (level == LogLevel::ERROR) {
-      fprintf(stderr, "%s\n", logMessage);
-    } else {
+    if (level == LogLevel::INFO) {
       fprintf(stdout, "%s\n", logMessage);
+    } else {
+      fprintf(stderr, "%s\n", logMessage);
     }
   }
 
