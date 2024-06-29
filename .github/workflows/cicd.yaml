@@ -1,0 +1,30 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}  # Use the PR head SHA for checkout
+
+      - name: Install dependencies
+        run: sudo apt-get install -y g++ cmake build-essential checkinstall zlib1g-dev libssl-dev
+
+      - name: Build
+        run: cmake -S . -B build && cmake --build build -j10
+
+      - name: Test
+        run: make do-all-unit-tests
+
+      - name: doxygen
+        run: make gen-doxygen
