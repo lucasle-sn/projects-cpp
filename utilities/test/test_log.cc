@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-#include <public_types/log.h>
+#include <utilities/log.h>
 
 namespace {
 

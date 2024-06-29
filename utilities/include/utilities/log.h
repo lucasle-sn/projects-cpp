@@ -1,10 +1,8 @@
-#ifndef PUBLIC_TYPES_LOG_H
-#define PUBLIC_TYPES_LOG_H
+#ifndef UTILITIES_LOG_H
+#define UTILITIES_LOG_H
 
 #include <cstdio>
-#include <memory>
 #include <mutex>
-#include <thread>
 
 namespace unimelb {
 
@@ -127,4 +125,4 @@ class Logger {
 
 }  // namespace unimelb
 
-#endif  // PUBLIC_TYPES_LOG_H
+#endif  // UTILITIES_LOG_H
