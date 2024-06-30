@@ -62,6 +62,7 @@ class Bytestream {
    *
    * @param buffer Byte buffer
    * @param size Length of buffer
+   * @param endianess Endianess
    */
   explicit Bytestream(uint8_t *buffer, size_t size,
                       Endianess endianess = Endianess::BIG_END) noexcept
@@ -92,7 +93,7 @@ class Bytestream {
   }
 
   /**
-   * @brief Check if buffer is overflowed when increasing <size> bytes
+   * @brief Check if buffer is overflowed when increasing \p size bytes
    *
    * @param size Increasing size
    * @return bool
@@ -102,10 +103,11 @@ class Bytestream {
   }
 
   /**
-   * @brief Get data type <T> from bytestream
+   * @brief Get data type T from bytestream
    *
    * @tparam T
    * @param data Output data
+   * @param data_len Output data length
    * @return bool
    */
   template <typename T>
@@ -123,7 +125,7 @@ class Bytestream {
   }
 
   /**
-   * @brief Get data type <T> from bytestream
+   * @brief Get data type T from bytestream
    *
    * @tparam T
    * @param data Output data
