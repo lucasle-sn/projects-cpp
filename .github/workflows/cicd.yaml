@@ -58,8 +58,7 @@ jobs:
 
       - name: Run build-wrapper
         run: |
-          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }}
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build -j10
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build -j10
 
       - name: Run sonar-scanner
         env:
