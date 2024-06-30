@@ -13,52 +13,58 @@
 
 namespace unimelb {
 
+/**
+ * @brief TCP Server class
+ */
 class Server {
  public:
   /**
-   * @brief Delete default constructor
+   * @brief Default constructor deleted
    */
   Server() = delete;
 
   /**
-   * @brief Delete copy constructor
+   * @brief Copy constructor deleted
    */
   Server(const Server &) = delete;
 
   /**
-   * @brief Delete move constructor
+   * @brief Move constructor deleted
    */
   Server(Server &&) = delete;
 
   /**
-   * @brief Delete copy assignment
+   * @brief Copy assignment deleted
    */
   Server &operator=(const Server &) = delete;
 
   /**
-   * @brief Delete move assignment
+   * @brief Move assignment deleted
    */
   Server &operator=(Server &&) = delete;
 
   /**
-   * @brief Constructor
-   * @param port Server port
+   * @brief Construct a new Server object
+   *
+   * @param port Binding port
    */
   explicit Server(int port);
 
   /**
-   * @brief Destructor
+   * @brief Destroy the Server object
    */
   ~Server() { stop(); };
 
   /**
    * @brief Initialize TCP server
+   *
    * @return ErrorCodes
    */
   ErrorCodes init();
 
   /**
    * @brief Main process TCP server
+   *
    * @return ErrorCodes
    */
   ErrorCodes run();
@@ -71,16 +77,17 @@ class Server {
  private:
   /**
    * @brief Handle client connection
+   *
    * @param socket Client
    */
   void handleClient(int socket);
 
-  int fd_;    // File descriptor
-  int port_;  // Port
-  struct sockaddr_in address_;
-  size_t addrlen_;
-  bool isRunning_{false};             // Running status
-  std::vector<std::thread> threads_;  // Client threads
+  int fd_;                            ///< File descriptor
+  int port_;                          ///< Binding port
+  struct sockaddr_in address_;        ///< Server config
+  size_t addrlen_;                    ///< Server config data length
+  bool isRunning_{false};             ///< Running status
+  std::vector<std::thread> threads_;  ///< Client threads
 };
 
 }  // namespace unimelb
