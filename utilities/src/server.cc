@@ -7,9 +7,9 @@ const int cBufferSize = 1024;
 
 namespace unimelb {
 
-Server::Server(int port) : port_(port), addrlen_(sizeof(address_)) {}
+Server::Server(int port) noexcept : port_(port), addrlen_(sizeof(address_)) {}
 
-ErrorCodes Server::init() {
+ErrorCodes Server::init() noexcept {
   fd_ = socket(AF_INET, SOCK_STREAM, 0);
   if (fd_ == -1) {
     fprintf(stderr, "Socket setup failed\n");
@@ -34,7 +34,7 @@ ErrorCodes Server::init() {
   return ErrorCodes::SUCCESS;
 }
 
-void Server::stop() {
+void Server::stop() noexcept {
   if (!isRunning_) {
     return;
   }
@@ -49,7 +49,7 @@ void Server::stop() {
   }
 }
 
-ErrorCodes Server::run() {
+ErrorCodes Server::run() noexcept {
   if (listen(fd_, 10) < 0) {
     fprintf(stderr, "Error socket listening\n");
     return ErrorCodes::ERROR;
@@ -70,7 +70,7 @@ ErrorCodes Server::run() {
   return ErrorCodes::SUCCESS;
 }
 
-void Server::handleClient(int socket) {
+void Server::handleClient(int socket) noexcept {
   char buffer[cBufferSize] = {0};
   read(socket, buffer, sizeof(buffer));
   std::cout << "Message received: " << buffer << std::endl;

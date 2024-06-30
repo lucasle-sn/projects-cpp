@@ -2,10 +2,10 @@
 
 namespace unimelb {
 
-Client::Client(const std::string &server_address, int port)
+Client::Client(const std::string &server_address, int port) noexcept
     : server_address_(server_address), port_(port) {}
 
-bool Client::connectServer() {
+bool Client::connectServer() noexcept {
   sock_ = socket(AF_INET, SOCK_STREAM, 0);
   if (sock_ == -1) {
     fprintf(stderr, "Socket creation error");
@@ -30,18 +30,18 @@ bool Client::connectServer() {
   return true;
 }
 
-void Client::disconnectServer() {
+void Client::disconnectServer() noexcept {
   if (sock_ != -1) {
     close(sock_);
     sock_ = -1;
   }
 }
 
-ssize_t Client::sendData(const void *data, size_t data_size) {
+ssize_t Client::sendData(const void *data, size_t data_size) noexcept {
   return send(sock_, data, data_size, 0);
 }
 
-ssize_t Client::receiveData(void *buffer, size_t buffer_size) {
+ssize_t Client::receiveData(void *buffer, size_t buffer_size) noexcept {
   return recv(sock_, buffer, buffer_size, 0);
 }
 

@@ -49,24 +49,24 @@ class Client {
    * @param address Server IP address
    * @param port Server binding port
    */
-  explicit Client(const std::string &address, int port);
+  explicit Client(const std::string &address, int port) noexcept;
 
   /**
    * @brief Destroy the Client object
    */
-  ~Client() { disconnectServer(); }
+  ~Client() noexcept { disconnectServer(); }
 
   /**
    * @brief Connect client to server
    *
    * @return true/false for success/failed
    */
-  bool connectServer();
+  bool connectServer() noexcept;
 
   /**
    * @brief Terminate connection
    */
-  void disconnectServer();
+  void disconnectServer() noexcept;
 
   /**
    * @brief Send data to server
@@ -75,7 +75,7 @@ class Client {
    * @param data_size Size of data
    * @return Size of data sent
    */
-  ssize_t sendData(const void *data, size_t data_size);
+  ssize_t sendData(const void *data, size_t data_size) noexcept;
 
   /**
    * @brief Receive data from server
@@ -84,7 +84,7 @@ class Client {
    * @param buffer_size Size of buffer
    * @return Size of data received
    */
-  ssize_t receiveData(void *buffer, size_t buffer_size);
+  ssize_t receiveData(void *buffer, size_t buffer_size) noexcept;
 
  private:
   int sock_;                        ///< Socket

@@ -48,31 +48,31 @@ class Server {
    *
    * @param port Binding port
    */
-  explicit Server(int port);
+  explicit Server(int port) noexcept;
 
   /**
    * @brief Destroy the Server object
    */
-  ~Server() { stop(); };
+  ~Server() noexcept { stop(); };
 
   /**
    * @brief Initialize TCP server
    *
    * @return ErrorCodes
    */
-  ErrorCodes init();
+  ErrorCodes init() noexcept;
 
   /**
    * @brief Main process TCP server
    *
    * @return ErrorCodes
    */
-  ErrorCodes run();
+  ErrorCodes run() noexcept;
 
   /**
    * @brief Stop server and close
    */
-  void stop();
+  void stop() noexcept;
 
  private:
   /**
@@ -80,7 +80,7 @@ class Server {
    *
    * @param socket Client
    */
-  void handleClient(int socket);
+  void handleClient(int socket) noexcept;
 
   int fd_;                            ///< File descriptor
   int port_;                          ///< Binding port
