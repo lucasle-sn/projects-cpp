@@ -27,7 +27,7 @@ jobs:
 
       - name: Build
         run: |
-          if [ "${matrix.build-type}" == "debug" ]; then
+          if [ "${matrix.build-type}" = "debug" ]; then
             cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build -j10
           else
             cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j10
