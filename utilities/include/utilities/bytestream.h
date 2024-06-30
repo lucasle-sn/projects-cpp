@@ -8,7 +8,7 @@
 #include <cstring>
 #include <type_traits>
 
-namespace unimelb {
+namespace qle {
 
 /**
  * @brief Endianess option
@@ -187,6 +187,6 @@ class Bytestream {
   Endianess endianess_{Endianess::BIG_END};
 };
 
-}  // namespace unimelb
+}  // namespace qle
 
 #endif  // UTILITIES_BYTESTREAM_H

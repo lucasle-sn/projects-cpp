@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-namespace unimelb {
+namespace qle {
 
 /**
  * @brief Span library
@@ -98,6 +98,6 @@ class Span {
   std::size_t size;
 };
 
-}  // namespace unimelb
+}  // namespace qle
 
 #endif  // PUBLIC_TYPES_SPAN_H
