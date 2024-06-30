@@ -11,6 +11,7 @@ enable_testing()
 add_subdirectory(third_party/gtest)
 
 add_subdirectory(coding_problems)
+add_subdirectory(design_pattern)
 add_subdirectory(public_types)
 add_subdirectory(utilities)
 
