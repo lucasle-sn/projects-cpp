@@ -42,7 +42,7 @@ jobs:
   sonar-cloud:
     name: Build and analyze
     runs-on: ubuntu-latest
-    needs: [build-linux]
+    # needs: [build-linux]
     env:
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
     steps:
