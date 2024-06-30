@@ -39,7 +39,7 @@ jobs:
 
   extra-checks:
     runs-on: ubuntu-latest
-    needs: [build-linux]
+    needs: [build-ubuntu]
     name: Extra Checks
     timeout-minutes: 10
     steps:
