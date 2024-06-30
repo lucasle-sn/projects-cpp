@@ -33,27 +33,27 @@ static constexpr uint8_t cByteSize{8};
 class Bytestream {
  public:
   /**
-   * @brief Delete default constructor
+   * @brief Default constructor deleted
    */
   Bytestream() = delete;
 
   /**
-   * @brief Delete copy constructor
+   * @brief Copy constructor deleted
    */
   Bytestream(const Bytestream &) = delete;
 
   /**
-   * @brief Delete move constructor
+   * @brief Move constructor deleted
    */
   Bytestream(Bytestream &&) = delete;
 
   /**
-   * @brief Delete copy assignment
+   * @brief Copy assignment deleted
    */
   Bytestream &operator=(const Bytestream &) = delete;
 
   /**
-   * @brief Delete move assignment
+   * @brief Move assignment deleted
    */
   Bytestream &operator=(Bytestream &&) = delete;
 
@@ -69,7 +69,7 @@ class Bytestream {
       : span_(buffer, size), endianess_(endianess){};
 
   /**
-   * @brief Destructor
+   * @brief Destroy the Bytestream object
    */
   ~Bytestream() noexcept { reset(); };
 

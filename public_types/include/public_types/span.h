@@ -22,27 +22,27 @@ class Span {
   explicit Span(T *ptr, std::size_t count) : data(ptr), size(count) {}
 
   /**
-   * @brief Delete default construct a new Span object
+   * @brief Default constructor deleted
    */
   Span() = delete;
 
   /**
-   * @brief Delete copy constructor
+   * @brief Copy constructor deleted
    */
   Span(const Span &) = delete;
 
   /**
-   * @brief Delete move constructor
+   * @brief Move constructor deleted
    */
   Span(Span &&) = delete;
 
   /**
-   * @brief Delete copy assignment
+   * @brief Copy assignment deleted
    */
   Span &operator=(const Span &) = delete;
 
   /**
-   * @brief Delete move assignment
+   * @brief Move assignment deleted
    */
   Span &operator=(Span &&) = delete;
 
