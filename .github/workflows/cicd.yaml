@@ -54,7 +54,7 @@ jobs:
 
       - name: Check clang-format
         run: |
-          FILES=$(find . -name '*.cc' -o -name '*.c' -o -name '*.h')
+          FILES=$(find . -name '*.cc' -o -name '*.c' -o -name '*.h' -not -path "third_party/*")
           for file in $FILES; do
             clang-format -style=file $file > formatted_file
             if ! diff $file formatted_file > /dev/null; then
