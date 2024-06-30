@@ -42,39 +42,40 @@ class Logger {
   Logger &operator=(Logger &&) = delete;
 
   /**
-   * @brief Constructor
+   * @brief Construct a new Logger object
    *
    * @param loggerName Logger name
    * @param level Log level
    */
-  explicit Logger(const char *loggerName, LogLevel level = LogLevel::INFO)
+  explicit Logger(const char *loggerName,
+                  LogLevel level = LogLevel::INFO) noexcept
       : loggerName_(loggerName), logLevel_(level) {}
 
   /**
-   * @brief Destructor
+   * @brief Destroy the Logger object
    */
   ~Logger() = default;
 
   /**
-   * @brief Log info
+   * @brief Log info to stdout
    *
    * @param message Log message
    */
-  void info(const char *message) { log(LogLevel::INFO, message); }
+  void info(const char *message) noexcept { log(LogLevel::INFO, message); }
 
   /**
-   * @brief Log warn
+   * @brief Log warning to stderr
    *
    * @param message Log message
    */
-  void warn(const char *message) { log(LogLevel::WARNING, message); }
+  void warn(const char *message) noexcept { log(LogLevel::WARNING, message); }
 
   /**
-   * @brief Log error
+   * @brief Log error to stderr
    *
    * @param message Log message
    */
-  void error(const char *message) { log(LogLevel::ERROR, message); }
+  void error(const char *message) noexcept { log(LogLevel::ERROR, message); }
 
  private:
   /**
@@ -83,7 +84,7 @@ class Logger {
    * @param level Log level
    * @param message Log message
    */
-  void log(LogLevel level, const char *message) {
+  void log(LogLevel level, const char *message) noexcept {
     if (level < logLevel_) {
       return;
     }
@@ -101,12 +102,12 @@ class Logger {
   }
 
   /**
-   * @brief Convert llog level to string
+   * @brief Convert log level to string
    *
    * @param level Log level
    * @return const char*
    */
-  const char *logLevelToString(LogLevel level) {
+  const char *logLevelToString(LogLevel level) noexcept {
     switch (level) {
       case LogLevel::INFO:
         return "info";
