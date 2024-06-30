@@ -44,16 +44,21 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-linux]
     env:
-      BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
+      BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
+
       - name: Install dependencies
+        run: sudo apt-get install -y g++ cmake build-essential checkinstall zlib1g-dev libssl-dev
         uses: SonarSource/sonarcloud-github-c-cpp@v2
+
       - name: Run build-wrapper
         run: |
-          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }}<insert_your_clean_build_command>
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }}
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build -j10
+
       - name: Run sonar-scanner
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
