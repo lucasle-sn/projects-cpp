@@ -1,4 +1,4 @@
-#include <tcp/server.h>
+#include <utilities/tcp/server.h>
 
 #include <cstring>
 #include <iostream>
@@ -64,7 +64,7 @@ ErrorCodes Server::run() {
       continue;
     }
 
-    threads_.emplace_back(&handleClient, this, socket);
+    threads_.emplace_back(&Server::handleClient, this, socket);
   }
 
   return ErrorCodes::SUCCESS;

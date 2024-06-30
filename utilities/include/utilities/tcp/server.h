@@ -1,5 +1,5 @@
-#ifndef TEMPLATE_TCP_SERVER_H
-#define TEMPLATE_TCP_SERVER_H
+#ifndef UTILITIES_TCP_SERVER_H
+#define UTILITIES_TCP_SERVER_H
 
 #include <public_types/error_codes.h>
 
@@ -85,4 +85,4 @@ class Server {
 
 }  // namespace unimelb
 
-#endif  // TEMPLATE_TCP_SERVER_H
+#endif  // UTILITIES_TCP_SERVER_H

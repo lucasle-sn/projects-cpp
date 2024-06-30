@@ -1,5 +1,5 @@
-#ifndef TEMPLATE_TCP_CLIENT_H
-#define TEMPLATE_TCP_CLIENT_H
+#ifndef UTILITIES_TCP_CLIENT_H
+#define UTILITIES_TCP_CLIENT_H
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -22,7 +22,7 @@ class Client {
   Client &operator=(Client &&) = delete;
 
   explicit Client(const std::string &address, int port);
-  ~Client() = default;
+  ~Client();
 
   bool connectServer();
   ssize_t sendData(const void *data, size_t data_size);
@@ -38,4 +38,4 @@ class Client {
 
 }  // namespace unimelb
 
-#endif  // TEMPLATE_TCP_CLIENT_H
+#endif  // UTILITIES_TCP_CLIENT_H
