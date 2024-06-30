@@ -13,6 +13,7 @@ target_link_libraries(utilities
 add_executable(unit-test-utilities
   test/test_bytestream.cc
   test/test_log.cc
+  test/test_thread.cc
 )
 
 target_link_libraries(unit-test-utilities
