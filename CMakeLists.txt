@@ -4,10 +4,17 @@ project(projects-cpp)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+message(STATUS "Enable testing")
+enable_testing()
+
 # Add third-party libraries
 add_subdirectory(third_party/gtest)
 
 add_subdirectory(coding_problems)
+add_subdirectory(design_pattern)
 add_subdirectory(public_types)
 add_subdirectory(template)
 add_subdirectory(utilities)
+
+# Doxygen setup
+add_subdirectory(doxygen) 
