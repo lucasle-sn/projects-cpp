@@ -25,7 +25,7 @@ jobs:
         run: cmake -S . -B build && cmake --build build -j10
 
       - name: Test
-        run: make do-all-unit-tests
+        run: cd build && ctest -j8 -T test --no-compress-output
 
-      # - name: doxygen
-      #   run: cmake --build build --target doxygen -- --no-print-directory
+      - name: doxygen
+        run: cmake --build build --target doxygen -- --no-print-directory
