@@ -36,9 +36,6 @@ jobs:
       - name: Test
         run: cd build && ctest -j8 -T test --no-compress-output
 
-      - name: doxygen
-        run: cmake --build build --target doxygen -- --no-print-directory
-
   doxygen-check:
     runs-on: ubuntu-latest
     needs: [build-linux]
