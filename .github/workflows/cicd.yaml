@@ -48,7 +48,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           submodules: true
           # fetch-depth: 0
 
@@ -60,13 +59,12 @@ jobs:
 
       - name: Run build-wrapper
         run: |
-          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build -j10
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build -j10
 
       - name: Run sonar-scanner
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}"
-          echo "${{ secrets.SONAR_TOKEN }}"
           sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
