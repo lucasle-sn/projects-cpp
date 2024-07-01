@@ -107,7 +107,7 @@ jobs:
           # lcov --remove coverage.info '/usr/*' --output-file coverage.info
           # lcov --list coverage.info
 
-          gcovr -r .. --xml -o coverage.xml
+          gcovr -r .. --sonarqube -o coverage.xml
           cat coverage.xml
 
       # - name: Upload code coverage report to Codecov
