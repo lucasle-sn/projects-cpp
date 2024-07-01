@@ -110,7 +110,13 @@ jobs:
       - name: Generate coverage information
         run: |
           # Run tests to generate coverage information
-          cd ${{ env.BUILD_DIRECTORY }} && ctest -j8 -T test --no-compress-output
+          # cd ${{ env.BUILD_DIRECTORY }} && ctest -j8 -T test --no-compress-output
+
+          for test in ${{ env.BUILD_DIRECTORY }}/**/unit-test-*; do
+            if [[ -x "$test" ]]; then
+              $test
+            fi
+          done
 
           # Collect the coverage
           gcovr --sonarqube > coverage.xml
