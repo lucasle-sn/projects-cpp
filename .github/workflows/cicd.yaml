@@ -107,7 +107,7 @@ jobs:
           # lcov --remove coverage.info '/usr/*' --output-file coverage.info
           # lcov --list coverage.info
 
-          gcovr -r .. --sonarqube -o coverage.xml
+          gcovr -r .. --sonarqube -o coverage.xml --exclude '../third_party/.*'
           cat coverage.xml
 
       # - name: Upload code coverage report to Codecov
@@ -136,4 +136,3 @@ jobs:
             # -Dsonar.sources=../**/src \
             # -Dsonar.tests=../**/test \
             # -Dsonar.coverage.exclusions=./third_party \
-            -Dsonar.cfamily.build-wrapper-output=build_wrapper_output_directory
