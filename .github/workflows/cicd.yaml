@@ -90,13 +90,30 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }}
 
+      - name: Install Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
+      - name: Install gcovr
+        run: |
+          pip install gcovr==5.0 # 5.1 is not supported
+
       - name: Install sonar-scanner and build-wrapper
         uses: SonarSource/sonarcloud-github-c-cpp@v2
 
       - name: Run build-wrapper
         run: |
-          cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Debug
+          cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Release
           build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ env.BUILD_DIRECTORY }} -j10
+
+      - name: Generate coverage information
+        run: |
+          # Run tests to generate coverage information
+          cd ${{ env.BUILD_DIRECTORY }} && ctest -j8 -T test --no-compress-output
+
+          # Collect the coverage
+          gcovr --sonarqube > coverage.xml
 
       - name: Run sonar-scanner
         env:
@@ -104,3 +121,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
+          sonar-scanner \
+            --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json" \
+            --define sonar.coverageReportPaths=${{ env.BUILD_DIRECTORY }}/coverage.xml
