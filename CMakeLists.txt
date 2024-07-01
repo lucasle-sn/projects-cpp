@@ -4,6 +4,8 @@ project(projects-cpp)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+option(DOXYGEN_BUILD_ENABLED "Enable Doxygen Build" OFF)
+
 message(STATUS "Enable testing")
 enable_testing()
 
@@ -16,4 +18,9 @@ add_subdirectory(public_types)
 add_subdirectory(utilities)
 
 # Doxygen setup
-add_subdirectory(doxygen) 
+if (DOXYGEN_BUILD_ENABLED)
+  message(STATUS "Doxygen build enabled")
+  add_subdirectory(doxygen)
+else()
+  message(STATUS "Doxygen build disabled")
+endif()
