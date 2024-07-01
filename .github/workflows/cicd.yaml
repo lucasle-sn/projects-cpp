@@ -90,6 +90,11 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }}
 
+      - name: Install Clang and LLVM (including llvm-cov)
+        uses: KyleMayes/install-llvm-action@v1.6.1
+        with:
+          version: "15.0.6"
+
       - name: Install sonar-scanner and build-wrapper
         uses: SonarSource/sonarcloud-github-c-cpp@v2
 
@@ -98,9 +103,25 @@ jobs:
           cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Debug
           build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ env.BUILD_DIRECTORY }} -j10
 
+      - name: Generate coverage information
+        run: |
+          # Run tests to generate coverage information
+          ./build/coverage_test1
+          mv default.profraw test1.profraw
+          ./build/coverage_test2
+          mv default.profraw test2.profraw
+
+          # Merge counters from different runs and convert the result into an llvm-cov-compatible form
+          llvm-profdata merge -o merged.profdata *.profraw
+
+          # Collect the coverage
+          llvm-cov show --show-branches=count --instr-profile merged.profdata build/coverage_test1 -object build/coverage_test2 > coverage.txt
+
       - name: Run sonar-scanner
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
+          sonar-scanner \
+            --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json" \
+            --define sonar.cfamily.llvm-cov.reportPath=coverage.txt
