@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <mutex>
 
-namespace unimelb {
+namespace dummy {
 
 /**
  * @brief Logger class
@@ -124,6 +124,6 @@ class Logger {
   std::mutex mutex_;        ///< Mutex
 };
 
-}  // namespace unimelb
+}  // namespace dummy
 
 #endif  // UTILITIES_TMP_H
