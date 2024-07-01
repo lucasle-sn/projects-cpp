@@ -107,10 +107,10 @@ jobs:
           lcov --remove coverage.info '/usr/*' --output-file coverage.info
           lcov --list coverage.info
 
-      - name: Upload code coverage report to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          files: ${{ env.BUILD_DIRECTORY }}/coverage.info
+      # - name: Upload code coverage report to Codecov
+      #   uses: codecov/codecov-action@v2
+      #   with:
+      #     files: ${{ env.BUILD_DIRECTORY }}/coverage.info
 
       - name: Run sonar-scanner
         uses: SonarSource/sonarcloud-github-action@v1
@@ -124,4 +124,5 @@ jobs:
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.sources=../**/src
             -Dsonar.tests=../**/test
+            -Dsonar.coverage.exclusions=../third_party
             -Dsonar.cfamily.build-wrapper-output=build_wrapper_output_directory
