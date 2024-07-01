@@ -10,6 +10,7 @@ on:
 
 env:
   BUILD_DEPENDENCIES: g++ cmake build-essential checkinstall zlib1g-dev libssl-dev doxygen graphviz
+  BUILD_DIRECTORY: build
 
 jobs:
   # build-linux:
@@ -45,7 +46,7 @@ jobs:
   sonar-cloud:
     name: Build and analyze
     runs-on: ubuntu-latest
-    needs: [build-linux]
+    # needs: [build-linux]
     env:
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
     steps:
