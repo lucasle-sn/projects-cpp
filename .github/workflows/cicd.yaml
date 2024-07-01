@@ -132,7 +132,7 @@ jobs:
           sonar-scanner \
             -Dsonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json" \
             -Dsonar.coverageReportPaths=${{ env.BUILD_DIRECTORY }}/coverage.xml \
-            -Dsonar.sources=../**/src \
-            -Dsonar.tests=../**/test \
-            -Dsonar.coverage.exclusions=../third_party \
+            # -Dsonar.sources=../**/src \
+            # -Dsonar.tests=../**/test \
+            -Dsonar.coverage.exclusions=./third_party \
             -Dsonar.cfamily.build-wrapper-output=build_wrapper_output_directory
