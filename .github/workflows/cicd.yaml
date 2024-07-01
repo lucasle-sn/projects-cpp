@@ -95,7 +95,7 @@ jobs:
 
       - name: Run build-wrapper
         run: |
-          cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Release
+          cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCODE_COVERAGE=ON -DCMAKE_C_FLAGS=--coverage -DCMAKE_CXX_FLAGS=--coverage
           build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ env.BUILD_DIRECTORY }} -j10
 
       - name: Generate coverage information
