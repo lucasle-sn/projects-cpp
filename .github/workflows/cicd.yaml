@@ -119,7 +119,7 @@ jobs:
           done
 
           # Collect the coverage
-          gcovr --sonarqube > coverage.xml
+          gcovr --sonarqube > ${{ env.BUILD_DIRECTORY }}/coverage.xml
 
       - name: Run sonar-scanner
         env:
@@ -129,4 +129,4 @@ jobs:
           sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
           sonar-scanner \
             --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json" \
-            --define sonar.coverageReportPaths=coverage.xml
+            --define sonar.coverageReportPaths=${{ env.BUILD_DIRECTORY }}/coverage.xml
