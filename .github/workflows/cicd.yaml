@@ -12,35 +12,35 @@ env:
   BUILD_DEPENDENCIES: g++ cmake build-essential checkinstall zlib1g-dev libssl-dev doxygen graphviz
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        build-type: [debug, release]
-    name: Build and Test ${{ matrix.build-type }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          submodules: true
+  # build-linux:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       build-type: [debug, release]
+  #   name: Build and Test ${{ matrix.build-type }}
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         ref: ${{ github.event.pull_request.head.sha }}
+  #         submodules: true
 
-      - name: Install dependencies
-        run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }}
+  #     - name: Install dependencies
+  #       run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }}
 
-      - name: Build
-        run: |
-          if [ "${{matrix.build-type}}" == "debug" ]; then
-            cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build -j10
-          else
-            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j10
-          fi
+  #     - name: Build
+  #       run: |
+  #         if [ "${{matrix.build-type}}" == "debug" ]; then
+  #           cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build -j10
+  #         else
+  #           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j10
+  #         fi
 
-      - name: Test
-        run: cd build && ctest -j8 -T test --no-compress-output
+  #     - name: Test
+  #       run: cd build && ctest -j8 -T test --no-compress-output
 
-      - name: doxygen
-        run: cmake --build build --target doxygen -- --no-print-directory
+  #     - name: doxygen
+  #       run: cmake --build build --target doxygen -- --no-print-directory
 
   sonar-cloud:
     name: Build and analyze
@@ -56,13 +56,30 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }}
 
+      - name: Set up Python 3.8 for gcovr
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
+      - name: Install gcovr 5.0
+        run: |
+          pip install gcovr==5.0 # 5.1 is not supported
+
       - name: Install sonar-scanner and build-wrapper
         uses: SonarSource/sonarcloud-github-c-cpp@v2
 
       - name: Run build-wrapper
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build -j10
+          cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Release
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ env.BUILD_DIRECTORY }} --config Release -j10
+
+      - name: Generate coverage information
+        run: |
+          # Run tests to generate coverage information
+          cd build && ctest -j8 -T test --no-compress-output
+
+          # Collect the coverage
+          gcovr --sonarqube > coverage.xml
 
       - name: Run sonar-scanner
         env:
@@ -70,3 +87,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
+          sonar-scanner \
+            --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json" \
+            --define sonar.coverageReportPaths=coverage.xml
