@@ -8,6 +8,9 @@ on:
     branches:
       - '*'
 
+env:
+  BUILD_DEPENDENCIES: g++ cmake build-essential checkinstall zlib1g-dev libssl-dev
+
 jobs:
   build-ubuntu:
     runs-on: ubuntu-latest
@@ -24,7 +27,7 @@ jobs:
           submodules: true
 
       - name: Install dependencies
-        run: sudo apt-get install -y g++ cmake build-essential checkinstall zlib1g-dev libssl-dev
+        run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }}
 
       - name: Build
         run: |
@@ -50,7 +53,10 @@ jobs:
           submodules: true
 
       - name: Install dependencies
-        run: sudo apt-get install -y g++ cmake build-essential checkinstall zlib1g-dev libssl-dev doxygen graphviz clang-format 
+        run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} doxygen graphviz clang-format 
+
+      - name: Build
+        run:  cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build -j10
 
       - name: Check clang-format
         run: |
@@ -68,4 +74,4 @@ jobs:
           echo "Clang-format check successful"
 
       - name: Check doxygen
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build --target doxygen -- --no-print-directory
+        run: cmake --build build --target doxygen -- --no-print-directory
