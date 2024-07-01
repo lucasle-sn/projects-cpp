@@ -10,6 +10,7 @@ on:
 
 env:
   BUILD_DEPENDENCIES: g++ cmake build-essential checkinstall zlib1g-dev libssl-dev
+  BUILD_DIRECTORY: build
 
 jobs:
   build-ubuntu:
@@ -32,13 +33,13 @@ jobs:
       - name: Build
         run: |
           if [ "${{matrix.build-type}}" == "DEBUG" ]; then
-            cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build -j10
+            cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Debug && cmake --build ${{ env.BUILD_DIRECTORY }} -j10
           else
-            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j10
+            cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Release && cmake --build ${{ env.BUILD_DIRECTORY }} -j10
           fi
 
       - name: Test
-        run: cd build && ctest -j8 -T test --no-compress-output
+        run: cd ${{ env.BUILD_DIRECTORY }} && ctest -j8 -T test --no-compress-output
 
   extra-checks:
     runs-on: ubuntu-latest
@@ -56,7 +57,7 @@ jobs:
         run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} doxygen graphviz clang-format 
 
       - name: Build
-        run:  cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build -j10
+        run:  cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Debug && cmake --build ${{ env.BUILD_DIRECTORY }} -j10
 
       - name: Check clang-format
         run: |
@@ -74,4 +75,4 @@ jobs:
           echo "Clang-format check successful"
 
       - name: Check doxygen
-        run: cmake --build build --target doxygen -- --no-print-directory
+        run: cmake --build ${{ env.BUILD_DIRECTORY }} --target doxygen -- --no-print-directory
