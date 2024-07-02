@@ -74,18 +74,18 @@ class Server {
    */
   void stop() noexcept;
 
- private:
+ protected:
   /**
    * @brief Handle client connection
    *
    * @param socket Client
    */
-  void handleClient(int socket) noexcept;
+  virtual void internal_run(int socket) noexcept;
 
+ private:
   int fd_;                            ///< File descriptor
   int port_;                          ///< Binding port
   struct sockaddr_in address_;        ///< Server config
-  size_t addrlen_;                    ///< Server config data length
   bool isRunning_{false};             ///< Running status
   std::vector<std::thread> threads_;  ///< Client threads
 };
