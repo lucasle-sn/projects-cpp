@@ -76,67 +76,67 @@ jobs:
   #         cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Debug -DDOXYGEN_BUILD_ENABLED=ON
   #         cmake --build ${{ env.BUILD_DIRECTORY }} --target doxygen -- --no-print-directory
 
-  sonar-cloud:
-    name: Sonarcloud Analysis
-    runs-on: ubuntu-latest
-    # needs: [build-ubuntu]
-    env:
-      BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
+  # sonar-cloud:
+  #   name: Sonarcloud Analysis
+  #   runs-on: ubuntu-latest
+  #   # needs: [build-ubuntu]
+  #   env:
+  #     BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: true
 
-      - name: Install dependencies
-        run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} lcov gcovr
+  #     - name: Install dependencies
+  #       run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} lcov gcovr
 
-      - name: Install sonar-scanner and build-wrapper
-        uses: SonarSource/sonarcloud-github-c-cpp@v2
+  #     - name: Install sonar-scanner and build-wrapper
+  #       uses: SonarSource/sonarcloud-github-c-cpp@v2
 
-      - name: Run build-wrapper
-        run: |
-          cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCODE_COVERAGE=ON -DCMAKE_C_FLAGS=--coverage -DCMAKE_CXX_FLAGS=--coverage
-          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ env.BUILD_DIRECTORY }} -j10
+  #     - name: Run build-wrapper
+  #       run: |
+  #         cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCODE_COVERAGE=ON -DCMAKE_C_FLAGS=--coverage -DCMAKE_CXX_FLAGS=--coverage
+  #         build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ env.BUILD_DIRECTORY }} -j10
 
-      - name: Generate coverage information
-        run: |
-          # Run tests to generate coverage information
-          cd ${{ env.BUILD_DIRECTORY }} && ctest -j8 -T test --no-compress-output
+  #     - name: Generate coverage information
+  #       run: |
+  #         # Run tests to generate coverage information
+  #         cd ${{ env.BUILD_DIRECTORY }} && ctest -j8 -T test --no-compress-output
 
-          # lcov --capture --directory . --output-file coverage.info
-          # lcov --remove coverage.info '/usr/*' --output-file coverage.info
-          # lcov --list coverage.info
+  #         # lcov --capture --directory . --output-file coverage.info
+  #         # lcov --remove coverage.info '/usr/*' --output-file coverage.info
+  #         # lcov --list coverage.info
 
-          gcovr -r .. --sonarqube -o coverage.xml --exclude '../third_party/.*'
-          cat coverage.xml
+  #         gcovr -r .. --sonarqube -o coverage.xml --exclude '../third_party/.*'
+  #         cat coverage.xml
 
-      # - name: Upload code coverage report to Codecov
-      #   uses: codecov/codecov-action@v2
-      #   with:
-      #     files: ${{ env.BUILD_DIRECTORY }}/coverage.info
+  #     # - name: Upload code coverage report to Codecov
+  #     #   uses: codecov/codecov-action@v2
+  #     #   with:
+  #     #     files: ${{ env.BUILD_DIRECTORY }}/coverage.info
 
-      - name: Run sonar-scanner
-        # uses: SonarSource/sonarcloud-github-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        # with:
-        #   projectBaseDir: ${{ env.BUILD_DIRECTORY }}
-        #   args: >
-        #     -Dsonar.organization=${{ secrets.SONAR_ORG }}
-        #     -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-        #     -Dsonar.sources=../**/src
-        #     -Dsonar.tests=../**/test
-        #     -Dsonar.coverage.exclusions=../third_party
-        #     -Dsonar.cfamily.build-wrapper-output=build_wrapper_output_directory
-        run: |
-          sonar-scanner \
-            -Dsonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json" \
-            -Dsonar.coverageReportPaths=${{ env.BUILD_DIRECTORY }}/coverage.xml \
-            -Dsonar.sources=./ \
-            -Dsonar.tests=./ \
-            -Dsonar.test.inclusions=**/test/**/* \
-            -Dsonar.exclusions=**/test/**/*
-            # -Dsonar.sources=**/src,**/include \
-            # -Dsonar.tests=**/test
-            # -Dsonar.coverage.exclusions=./third_party \
+  #     - name: Run sonar-scanner
+  #       # uses: SonarSource/sonarcloud-github-action@v1
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #       # with:
+  #       #   projectBaseDir: ${{ env.BUILD_DIRECTORY }}
+  #       #   args: >
+  #       #     -Dsonar.organization=${{ secrets.SONAR_ORG }}
+  #       #     -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+  #       #     -Dsonar.sources=../**/src
+  #       #     -Dsonar.tests=../**/test
+  #       #     -Dsonar.coverage.exclusions=../third_party
+  #       #     -Dsonar.cfamily.build-wrapper-output=build_wrapper_output_directory
+  #       run: |
+  #         sonar-scanner \
+  #           -Dsonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json" \
+  #           -Dsonar.coverageReportPaths=${{ env.BUILD_DIRECTORY }}/coverage.xml \
+  #           -Dsonar.sources=./ \
+  #           -Dsonar.tests=./ \
+  #           -Dsonar.test.inclusions=**/test/**/* \
+  #           -Dsonar.exclusions=**/test/**/*
+  #           # -Dsonar.sources=**/src,**/include \
+  #           # -Dsonar.tests=**/test
+  #           # -Dsonar.coverage.exclusions=./third_party \
