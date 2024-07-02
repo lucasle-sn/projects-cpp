@@ -1,7 +1,7 @@
 #ifndef PUBLIC_TYPES_ERROR_CODES_H
 #define PUBLIC_TYPES_ERROR_CODES_H
 
-namespace unimelb {
+namespace qle {
 
 enum class ErrorCodes {
   SUCCESS,

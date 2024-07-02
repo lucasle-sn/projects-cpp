@@ -1,6 +1,6 @@
 #include <utilities/tcp/client.h>
 
-namespace unimelb {
+namespace qle {
 
 Client::Client(const std::string &server_address, int port) noexcept
     : server_address_(server_address), port_(port) {}
@@ -45,4 +45,4 @@ ssize_t Client::receiveData(void *buffer, size_t buffer_size) noexcept {
   return recv(sock_, buffer, buffer_size, 0);
 }
 
-}  // namespace unimelb
+}  // namespace qle

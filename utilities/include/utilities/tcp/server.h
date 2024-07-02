@@ -11,7 +11,7 @@
 #include <thread>
 #include <vector>
 
-namespace unimelb {
+namespace qle {
 
 /**
  * @brief TCP Server class
@@ -90,6 +90,6 @@ class Server {
   std::vector<std::thread> threads_;  ///< Client threads
 };
 
-}  // namespace unimelb
+}  // namespace qle
 
 #endif  // UTILITIES_TCP_SERVER_H

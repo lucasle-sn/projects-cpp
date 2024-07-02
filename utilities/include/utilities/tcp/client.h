@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 
-namespace unimelb {
+namespace qle {
 
 /**
  * @brief TCP Client class
@@ -93,6 +93,6 @@ class Client {
   struct sockaddr_in server_info_;  ///< Server configuration info
 };
 
-}  // namespace unimelb
+}  // namespace qle
 
 #endif  // UTILITIES_TCP_CLIENT_H

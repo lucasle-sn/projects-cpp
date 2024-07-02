@@ -5,7 +5,7 @@
 
 const int cBufferSize = 1024;
 
-namespace unimelb {
+namespace qle {
 
 Server::Server(int port) noexcept : port_(port), addrlen_(sizeof(address_)) {}
 
@@ -82,4 +82,4 @@ void Server::handleClient(int socket) noexcept {
   close(socket);
 }
 
-}  // namespace unimelb
+}  // namespace qle
