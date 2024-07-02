@@ -13,8 +13,7 @@ class TestSpan : public ::testing::Test {
    * @param span Span
    */
   template <typename T, size_t N>
-  void assert_span_elements(const unimelb::Span<T> &span,
-                            const T (&buffer)[N]) {
+  void assert_span_elements(const qle::Span<T> &span, const T (&buffer)[N]) {
     ASSERT_EQ(span.Size(), N);
     for (size_t i = 0; i < span.Size(); i++) {
       ASSERT_EQ(span[i], buffer[i]);
@@ -31,7 +30,7 @@ class TestSpan : public ::testing::Test {
   void test_span_type() {
     T buffer[2]{static_cast<T>(1),
                 static_cast<T>(2)};  // 1 and 2 are just random values
-    unimelb::Span<T> span(buffer, sizeof(buffer) / sizeof(buffer[0]));
+    qle::Span<T> span(buffer, sizeof(buffer) / sizeof(buffer[0]));
     assert_span_elements(span, buffer);
   }
 };
@@ -40,7 +39,7 @@ TEST_F(TestSpan, TestBasic) {
   uint8_t buffer[10]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   size_t buffer_len{sizeof(buffer) / sizeof(buffer[0])};
 
-  unimelb::Span<uint8_t> span(&buffer[0], buffer_len);
+  qle::Span<uint8_t> span(&buffer[0], buffer_len);
 
   ASSERT_EQ(span.Size(), buffer_len);
 
