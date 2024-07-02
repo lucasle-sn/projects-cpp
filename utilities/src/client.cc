@@ -2,32 +2,35 @@
 
 namespace qle {
 
-Client::Client(const std::string &server_address, int port) noexcept
+Client::Client(const char *server_address, int port) noexcept
     : server_address_(server_address), port_(port) {}
 
-bool Client::connectServer() noexcept {
+ErrorCodes Client::init() noexcept {
   sock_ = socket(AF_INET, SOCK_STREAM, 0);
   if (sock_ == -1) {
     fprintf(stderr, "Socket creation error");
-    return false;
+    return ErrorCodes::ERROR;
   }
 
-  server_info_.sin_family = AF_INET;
-  server_info_.sin_port = htons(port_);
+  server_addr_.sin_family = AF_INET;
+  server_addr_.sin_port = htons(port_);
 
-  if (inet_pton(AF_INET, server_address_.c_str(), &server_info_.sin_addr) <=
-      0) {
+  // Convert IPv4 and IPv6 addresses to binary form
+  if (inet_pton(AF_INET, server_address_, &server_addr_.sin_addr) <= 0) {
     fprintf(stderr, "Invalid address/ Address not supported");
-    return false;
+    close(sock_);
+    return ErrorCodes::ERROR;
   }
+  return ErrorCodes::SUCCESS;
+}
 
-  if (connect(sock_, (struct sockaddr *)&server_info_, sizeof(server_info_)) <
+ErrorCodes Client::connectServer() noexcept {
+  if (connect(sock_, (struct sockaddr *)&server_addr_, sizeof(server_addr_)) <
       0) {
     fprintf(stderr, "Connection Failed");
-    return false;
+    return ErrorCodes::ERROR;
   }
-
-  return true;
+  return ErrorCodes::SUCCESS;
 }
 
 void Client::disconnectServer() noexcept {

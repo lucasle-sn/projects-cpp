@@ -1,6 +1,8 @@
 #ifndef UTILITIES_TCP_CLIENT_H
 #define UTILITIES_TCP_CLIENT_H
 
+#include <public_types/error_codes.h>
+
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -9,7 +11,6 @@
 #include <unistd.h>
 #include <cstring>
 #include <iostream>
-#include <string>
 
 namespace qle {
 
@@ -49,7 +50,7 @@ class Client {
    * @param address Server IP address
    * @param port Server binding port
    */
-  explicit Client(const std::string &address, int port) noexcept;
+  explicit Client(const char *address, int port) noexcept;
 
   /**
    * @brief Destroy the Client object
@@ -57,11 +58,18 @@ class Client {
   ~Client() noexcept { disconnectServer(); }
 
   /**
+   * @brief Initialize TCP client
+   *
+   * @return ErrorCodes
+   */
+  ErrorCodes init() noexcept;
+
+  /**
    * @brief Connect client to server
    *
    * @return true/false for success/failed
    */
-  bool connectServer() noexcept;
+  ErrorCodes connectServer() noexcept;
 
   /**
    * @brief Terminate connection
@@ -88,9 +96,9 @@ class Client {
 
  private:
   int sock_;                        ///< Socket
-  std::string server_address_;      ///< Server IP address
+  const char *server_address_;      ///< Server IP address
   int port_;                        ///< Server binding port
-  struct sockaddr_in server_info_;  ///< Server configuration info
+  struct sockaddr_in server_addr_;  ///< Server configuration info
 };
 
 }  // namespace qle
