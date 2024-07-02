@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <mutex>
 
-namespace unimelb {
+namespace qle {
 
 /**
  * @brief Logger class
@@ -124,6 +124,6 @@ class Logger {
   std::mutex mutex_;        ///< Mutex
 };
 
-}  // namespace unimelb
+}  // namespace qle
 
 #endif  // UTILITIES_LOG_H

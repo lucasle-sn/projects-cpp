@@ -2,7 +2,7 @@
 #include <utilities/bytestream.h>
 #include <cmath>
 
-using Bytestream = unimelb::Bytestream;
+using Bytestream = qle::Bytestream;
 
 namespace {
 
@@ -15,8 +15,7 @@ class TestBytestream : public ::testing::Test {
    * @param endianess Bytestream endianess
    */
   template <typename T>
-  void assert_get_types(
-      unimelb::Endianess endianess = unimelb::Endianess::BIG_END) {
+  void assert_get_types(qle::Endianess endianess = qle::Endianess::BIG_END) {
     // use a fix buffer
     uint8_t buffer[]{0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
     size_t buffer_len = sizeof(buffer) / sizeof(buffer[0]);
@@ -29,16 +28,16 @@ class TestBytestream : public ::testing::Test {
 
     for (size_t i = 0; i <= buffer_len - sizeof(T); i++) {
       uint64_t expected_tmp{0};
-      if (endianess == unimelb::Endianess::BIG_END) {
+      if (endianess == qle::Endianess::BIG_END) {
         expected_tmp = static_cast<T>(
-            (cBufferU64BE << (i * unimelb::cByteSize) >>
-             (sizeof(cBufferU64BE) - sizeof(T)) * unimelb::cByteSize) &
+            (cBufferU64BE << (i * qle::cByteSize) >>
+             (sizeof(cBufferU64BE) - sizeof(T)) * qle::cByteSize) &
             0xFFFFFFFFFFFFFFFFU);
       } else {
         expected_tmp = static_cast<T>(
             cBufferU64LE << ((sizeof(cBufferU64LE) - sizeof(T) - i) *
-                             unimelb::cByteSize) >>
-            ((sizeof(cBufferU64LE) - sizeof(T)) * unimelb::cByteSize));
+                             qle::cByteSize) >>
+            ((sizeof(cBufferU64LE) - sizeof(T)) * qle::cByteSize));
       }
 
       T dest{0};
@@ -98,16 +97,16 @@ TEST_F(TestBytestream, TestGetVariousTypes) {
   assert_get_types<double>();
 
   // Endiness::LITTLE_END
-  assert_get_types<uint8_t>(unimelb::Endianess::LITTLE_END);
-  assert_get_types<uint16_t>(unimelb::Endianess::LITTLE_END);
-  assert_get_types<uint32_t>(unimelb::Endianess::LITTLE_END);
-  assert_get_types<uint64_t>(unimelb::Endianess::LITTLE_END);
-  assert_get_types<int8_t>(unimelb::Endianess::LITTLE_END);
-  assert_get_types<int16_t>(unimelb::Endianess::LITTLE_END);
-  assert_get_types<int32_t>(unimelb::Endianess::LITTLE_END);
-  assert_get_types<int64_t>(unimelb::Endianess::LITTLE_END);
-  assert_get_types<float>(unimelb::Endianess::LITTLE_END);
-  assert_get_types<double>(unimelb::Endianess::LITTLE_END);
+  assert_get_types<uint8_t>(qle::Endianess::LITTLE_END);
+  assert_get_types<uint16_t>(qle::Endianess::LITTLE_END);
+  assert_get_types<uint32_t>(qle::Endianess::LITTLE_END);
+  assert_get_types<uint64_t>(qle::Endianess::LITTLE_END);
+  assert_get_types<int8_t>(qle::Endianess::LITTLE_END);
+  assert_get_types<int16_t>(qle::Endianess::LITTLE_END);
+  assert_get_types<int32_t>(qle::Endianess::LITTLE_END);
+  assert_get_types<int64_t>(qle::Endianess::LITTLE_END);
+  assert_get_types<float>(qle::Endianess::LITTLE_END);
+  assert_get_types<double>(qle::Endianess::LITTLE_END);
 }
 
 }  // namespace

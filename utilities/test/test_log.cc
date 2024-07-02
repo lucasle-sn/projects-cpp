@@ -9,7 +9,7 @@ class TestLog : public ::testing::Test {};
 
 TEST_F(TestLog, LogVariousLevels) {
   const char *loggerName{"TestLog"};
-  auto logger = std::make_unique<unimelb::Logger>(loggerName);
+  auto logger = std::make_unique<qle::Logger>(loggerName);
   const char *msg{"Sample text"};
 
   {
@@ -45,7 +45,7 @@ TEST_F(TestLog, LogVariousLevels) {
 
 TEST_F(TestLog, LogMultipleTimes) {
   const char *loggerName{"TestLog"};
-  auto logger = std::make_unique<unimelb::Logger>(loggerName);
+  auto logger = std::make_unique<qle::Logger>(loggerName);
   const char *msg{"Sample text"};
 
   for (size_t i = 0; i < 10; i++) {
@@ -76,8 +76,8 @@ TEST_F(TestLog, LogMultipleTimes) {
 
 TEST_F(TestLog, LogHigherLevel) {
   const char *loggerName{"TestLog"};
-  auto loggerWarn = std::make_unique<unimelb::Logger>(
-      loggerName, unimelb::Logger::LogLevel::WARNING);
+  auto loggerWarn =
+      std::make_unique<qle::Logger>(loggerName, qle::Logger::LogLevel::WARNING);
   const char *msg{"Sample text"};
 
   {
@@ -110,8 +110,8 @@ TEST_F(TestLog, LogHigherLevel) {
     EXPECT_EQ(out, buff);
   }
 
-  auto loggerError = std::make_unique<unimelb::Logger>(
-      loggerName, unimelb::Logger::LogLevel::ERROR);
+  auto loggerError =
+      std::make_unique<qle::Logger>(loggerName, qle::Logger::LogLevel::ERROR);
   {
     // Expect NO Log info returned
     testing::internal::CaptureStdout();
