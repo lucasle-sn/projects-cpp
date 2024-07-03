@@ -21,6 +21,7 @@ namespace qle {
  * @brief TCP Server class
  */
 class Server {
+ public:
   /**
    * @brief Server's connection handling mode
    */
@@ -29,7 +30,6 @@ class Server {
     NON_BLOCKING,  ///< Non blocking mode
   };
 
- public:
   /**
    * @brief Default constructor deleted
    */
@@ -60,7 +60,8 @@ class Server {
    *
    * @param port Binding port
    */
-  explicit Server(int port, Mode mode = Mode::BLOCKING) noexcept;
+  explicit Server(int port, Mode mode = Mode::BLOCKING,
+                  int timeout_sec = -1) noexcept;
 
   /**
    * @brief Destroy the Server object
@@ -108,11 +109,12 @@ class Server {
    */
   void run_blocking() noexcept;
 
-  Mode mode_;                         ///< connection handling mode
   int listener_fd_;                   ///< Listener fd
   int port_;                          ///< Binding port
   struct sockaddr_in server_addr_;    ///< Server config
   std::vector<std::thread> threads_;  ///< Client threads
+  Mode mode_;                         ///< connection handling mode
+  int timeout_sec_;                   ///< accecpt connection timeout
 };
 
 }  // namespace qle

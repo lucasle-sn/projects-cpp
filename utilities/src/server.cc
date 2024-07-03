@@ -12,7 +12,8 @@ const int cBufferSize = 1024;
 
 namespace qle {
 
-Server::Server(int port, Mode mode) noexcept : mode_(mode), port_(port) {}
+Server::Server(int port, Mode mode, int timeout_sec) noexcept
+    : port_(port), mode_(mode), timeout_sec_(timeout_sec) {}
 
 ErrorCodes Server::init() noexcept {
   // Create an AF_INET (v4) stream socket to receive incoming connections on
@@ -47,6 +48,21 @@ ErrorCodes Server::init() noexcept {
     fprintf(stderr, "Error socket listening\n");
     close(listener_fd_);
     return ErrorCodes::ERROR;
+  }
+
+  // Set the timeout for the accept call
+  if (timeout_sec_ > 0) {
+    fprintf(stderr, "Setup timeout %d seconds\n", timeout_sec_);
+    struct timeval timeout;
+    timeout.tv_sec = timeout_sec_;
+    timeout.tv_usec = 0;
+
+    if (setsockopt(listener_fd_, SOL_SOCKET, SO_RCVTIMEO,
+                   (const char *)&timeout, sizeof(timeout)) < 0) {
+      fprintf(stderr, "Fail to setup timeout for connection accept\n");
+      close(listener_fd_);
+      return ErrorCodes::ERROR;
+    }
   }
 
   fprintf(stdout, "Successfully bind port %d\n", port_);
