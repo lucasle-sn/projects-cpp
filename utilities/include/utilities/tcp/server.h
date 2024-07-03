@@ -4,10 +4,14 @@
 #include <public_types/error_codes.h>
 
 #include <netinet/in.h>
+#include <sys/poll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 
+#include <fcntl.h>
 #include <unistd.h>
+#include <atomic>
+#include <condition_variable>
 #include <thread>
 #include <vector>
 
@@ -17,6 +21,14 @@ namespace qle {
  * @brief TCP Server class
  */
 class Server {
+  /**
+   * @brief Server's connection handling mode
+   */
+  enum class Mode {
+    BLOCKING,      ///< Blocking mode
+    NON_BLOCKING,  ///< Non blocking mode
+  };
+
  public:
   /**
    * @brief Default constructor deleted
@@ -48,7 +60,7 @@ class Server {
    *
    * @param port Binding port
    */
-  explicit Server(int port) noexcept;
+  explicit Server(int port, Mode mode = Mode::BLOCKING) noexcept;
 
   /**
    * @brief Destroy the Server object
@@ -64,10 +76,8 @@ class Server {
 
   /**
    * @brief Main process TCP server
-   *
-   * @return ErrorCodes
    */
-  ErrorCodes run() noexcept;
+  void run() noexcept;
 
   /**
    * @brief Stop server and close
@@ -80,13 +90,28 @@ class Server {
    *
    * @param socket Client
    */
-  virtual void internal_run(int socket) noexcept;
+  virtual void internal_run(int socket) noexcept { close(socket); };
+
+ protected:
+  std::atomic<bool> isRunning_{false};  ///< Running status
 
  private:
-  int fd_;                            ///< File descriptor
+  /**
+   * @brief Accept an incoming connection
+   *
+   * @return int client socket
+   */
+  int accept_connection() noexcept;
+
+  /**
+   * @brief Main process blocking mode
+   */
+  void run_blocking() noexcept;
+
+  Mode mode_;                         ///< connection handling mode
+  int listener_fd_;                   ///< Listener fd
   int port_;                          ///< Binding port
-  struct sockaddr_in address_;        ///< Server config
-  bool isRunning_{false};             ///< Running status
+  struct sockaddr_in server_addr_;    ///< Server config
   std::vector<std::thread> threads_;  ///< Client threads
 };
 
