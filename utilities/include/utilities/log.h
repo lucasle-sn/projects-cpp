@@ -1,6 +1,7 @@
 #ifndef UTILITIES_LOG_H
 #define UTILITIES_LOG_H
 
+#include <cstdarg>
 #include <cstdio>
 #include <mutex>
 
