@@ -140,4 +140,47 @@ TEST_F(TestLog, LogHigherLevel) {
   }
 }
 
+TEST_F(TestLog, LogComplexFormat) {
+  const char *loggerName{"TestLog"};
+  auto logger = std::make_unique<qle::Logger>(loggerName);
+  int tmp;
+  const char *format{"%s %zu %d %p"};
+  const char *expected_format{"[%s] %s: %s %zu %d %p\n"};
+
+  const char *msg{"Sample text"};
+
+  {
+    testing::internal::CaptureStdout();
+    logger->info(format, msg, 1, -2, &tmp);
+    auto out = testing::internal::GetCapturedStdout();
+
+    char buff[1024]{};
+    snprintf(buff, sizeof(buff), expected_format, "info", loggerName, msg, 1,
+             -2, &tmp);
+    EXPECT_EQ(out, buff);
+  }
+
+  {
+    testing::internal::CaptureStderr();
+    logger->warn(format, msg, 1, -2, &tmp);
+    auto out = testing::internal::GetCapturedStderr();
+
+    char buff[1024]{};
+    snprintf(buff, sizeof(buff), expected_format, "warn", loggerName, msg, 1,
+             -2, &tmp);
+    EXPECT_EQ(out, buff);
+  }
+
+  {
+    testing::internal::CaptureStderr();
+    logger->error(format, msg, 1, -2, &tmp);
+    auto out = testing::internal::GetCapturedStderr();
+
+    char buff[1024]{};
+    snprintf(buff, sizeof(buff), expected_format, "error", loggerName, msg, 1,
+             -2, &tmp);
+    EXPECT_EQ(out, buff);
+  }
+}
+
 }  // namespace
