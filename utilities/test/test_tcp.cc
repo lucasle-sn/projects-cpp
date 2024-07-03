@@ -1,8 +1,8 @@
-#include <gtest/gtest.h>
-#include <memory>
-
 #include <utilities/tcp/client.h>
 #include <utilities/tcp/server.h>
+
+#include <gtest/gtest.h>
+#include <memory>
 
 namespace {
 
@@ -17,15 +17,6 @@ class ServerAccessor : public qle::Server {
                           int timeout_sec = -1) noexcept
       : Server(port, mode, timeout_sec) {}
 
-  int get_counter() const { return counter_; };
-
-  // void terminate() {
-  //   auto terminate_thread = std::thread([&]() {
-  //     std::this_thread::sleep_for(std::chrono::milliseconds(2500));
-  //     isRunning_ = false;
-  //   })
-  // }
-
  protected:
   void internal_run(int socket) noexcept override {
     char buffer[1024] = {0};
@@ -33,19 +24,11 @@ class ServerAccessor : public qle::Server {
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     std::string str_return = "Server: " + std::string(buffer);
-    printf("Send data from server\n");
+
     send(socket, str_return.c_str(), str_return.size(), 0);
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-    isRunning_ = false;  // This is work around to  stop server polling
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     close(socket);
   }
-
- private:
-  int counter_ = 0;
-  using qle::Server::isRunning_;
 };
 
 TEST_F(TestTcp, BasicUsage) {

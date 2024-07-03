@@ -1,14 +1,16 @@
+#include <utilities/log.h>
 #include <utilities/tcp/server.h>
 
 #include <cstring>
-#include <iostream>
+#include <memory>
 
-const int cBufferSize = 1024;
 /**
  * Reference:
  * https://www.ibm.com/docs/en/i/7.4?topic=designs-using-poll-instead-select
  *
  */
+
+static auto logger = std::make_unique<qle::Logger>("Server");
 
 namespace qle {
 
@@ -19,7 +21,7 @@ ErrorCodes Server::init() noexcept {
   // Create an AF_INET (v4) stream socket to receive incoming connections on
   listener_fd_ = socket(AF_INET, SOCK_STREAM, 0);
   if (listener_fd_ == -1) {
-    fprintf(stderr, "Socket setup failed\n");
+    logger->error("Socket creation failed");
     return ErrorCodes::ERROR;
   }
 
@@ -27,7 +29,7 @@ ErrorCodes Server::init() noexcept {
   int opt = 1;
   if (setsockopt(listener_fd_, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
                  sizeof(opt)) == -1) {
-    fprintf(stderr, "Socket setup failed\n");
+    logger->error("Socket setup failed");
     close(listener_fd_);
     return ErrorCodes::ERROR;
   }
@@ -39,39 +41,39 @@ ErrorCodes Server::init() noexcept {
   // Bind the socket to the network address and port
   if (bind(listener_fd_, (struct sockaddr *)&server_addr_,
            sizeof(server_addr_)) < 0) {
-    fprintf(stderr, "Socket binding failed\n");
+    logger->error("Socket binding failed");
     close(listener_fd_);
     return ErrorCodes::ERROR;
   }
 
   if (listen(listener_fd_, 3) < 0) {
-    fprintf(stderr, "Error socket listening\n");
+    logger->error("Socket listening failed");
     close(listener_fd_);
     return ErrorCodes::ERROR;
   }
 
   // Set the timeout for the accept call
   if (timeout_sec_ > 0) {
-    fprintf(stderr, "Setup timeout %d seconds\n", timeout_sec_);
     struct timeval timeout;
     timeout.tv_sec = timeout_sec_;
     timeout.tv_usec = 0;
 
     if (setsockopt(listener_fd_, SOL_SOCKET, SO_RCVTIMEO,
                    (const char *)&timeout, sizeof(timeout)) < 0) {
-      fprintf(stderr, "Fail to setup timeout for connection accept\n");
+      logger->error("Fail to setup timeout for connection accept");
       close(listener_fd_);
       return ErrorCodes::ERROR;
     }
+    logger->info("Setup timeout %d seconds", timeout_sec_);
   }
 
-  fprintf(stdout, "Successfully bind port %d\n", port_);
-  isRunning_.store(true);
+  logger->info("Successfully bind port %d", port_);
+  isRunning_ = true;
   return ErrorCodes::SUCCESS;
 }
 
 void Server::stop() noexcept {
-  fprintf(stdout, "Stop server\n");
+  logger->info("Stop server");
   isRunning_ = false;
   close(listener_fd_);
 
@@ -95,12 +97,12 @@ int Server::accept_connection() noexcept {
   int client_socket = accept(listener_fd_, (struct sockaddr *)&peer_addr,
                              (socklen_t *)&peer_addr_len);
   if (client_socket < 0) {
-    fprintf(stderr, "Accept failed\n");
+    logger->error("Listener accept failed");
     return client_socket;
   }
 
+  logger->info("Client connection accepted with socket %d", client_socket);
   threads_.emplace_back(&Server::internal_run, this, client_socket);
-  fprintf(stderr, "Client socket %d\n", client_socket);
   return client_socket;
 }
 
