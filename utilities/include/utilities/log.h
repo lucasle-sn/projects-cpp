@@ -1,6 +1,7 @@
 #ifndef UTILITIES_LOG_H
 #define UTILITIES_LOG_H
 
+#include <cstdarg>
 #include <cstdio>
 #include <mutex>
 
@@ -59,23 +60,41 @@ class Logger {
   /**
    * @brief Log info to stdout
    *
-   * @param message Log message
+   * @param format Format
+   * @param ...
    */
-  void info(const char *message) noexcept { log(LogLevel::INFO, message); }
+  void info(const char *format, ...) noexcept {
+    va_list args;
+    va_start(args, format);
+    log(LogLevel::INFO, format, args);
+    va_end(args);
+  }
 
   /**
    * @brief Log warning to stderr
    *
-   * @param message Log message
+   * @param format Format
+   * @param ...
    */
-  void warn(const char *message) noexcept { log(LogLevel::WARNING, message); }
+  void warn(const char *format, ...) noexcept {
+    va_list args;
+    va_start(args, format);
+    log(LogLevel::WARNING, format, args);
+    va_end(args);
+  }
 
   /**
    * @brief Log error to stderr
    *
-   * @param message Log message
+   * @param format Format
+   * @param ...
    */
-  void error(const char *message) noexcept { log(LogLevel::ERROR, message); }
+  void error(const char *format, ...) noexcept {
+    va_list args;
+    va_start(args, format);
+    log(LogLevel::ERROR, format, args);
+    va_end(args);
+  }
 
  private:
   /**
@@ -84,20 +103,23 @@ class Logger {
    * @param level Log level
    * @param message Log message
    */
-  void log(LogLevel level, const char *message) noexcept {
+  void log(LogLevel level, const char *format, va_list args) noexcept {
     if (level < logLevel_) {
       return;
     }
 
     std::lock_guard<std::mutex> guard(mutex_);
     char logMessage[1024]{};
-    snprintf(logMessage, sizeof(logMessage), "[%s] %s: %s",
-             logLevelToString(level), loggerName_, message);
+    vsnprintf(logMessage, sizeof(logMessage), format, args);
+
+    char fullLogMessage[1024]{};
+    snprintf(fullLogMessage, sizeof(fullLogMessage), "[%s] %s: %s",
+             logLevelToString(level), loggerName_, logMessage);
 
     if (level == LogLevel::INFO) {
-      fprintf(stdout, "%s\n", logMessage);
+      fprintf(stdout, "%s\n", fullLogMessage);
     } else {
-      fprintf(stderr, "%s\n", logMessage);
+      fprintf(stderr, "%s\n", fullLogMessage);
     }
   }
 
