@@ -1,0 +1,37 @@
+name: Doxygen Check Pipeline
+
+on:
+  workflow_run:
+    workflows: ["Build Pipeline"]
+    types:
+      - completed
+  # push:
+  #   branches:
+  #     - master
+  # pull_request:
+  #   branches:
+  #     - '*'
+
+env:
+  BUILD_DEPENDENCIES: g++ cmake build-essential checkinstall zlib1g-dev libssl-dev
+  BUILD_DIRECTORY: build
+
+jobs:
+  clang-format-check:
+    runs-on: ubuntu-latest
+    name: Doxygen Check
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: recursive
+
+      - name: Install dependencies
+        run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} doxygen graphviz
+
+      - name: Check doxygen
+        run: |
+          cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Debug -DDOXYGEN_BUILD_ENABLED=ON
+          cmake --build ${{ env.BUILD_DIRECTORY }} --target doxygen -- --no-print-directory

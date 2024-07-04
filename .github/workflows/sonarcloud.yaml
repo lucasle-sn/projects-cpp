@@ -1,12 +1,16 @@
-name: Sonarcloud Pipeline
+name: Sonarcloud Analysis Pipeline
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - '*'
+  workflow_run:
+    workflows: ["Build Pipeline"]
+    types:
+      - completed
+  # push:
+  #   branches:
+  #     - master
+  # pull_request:
+  #   branches:
+  #     - '*'
 
 env:
   BUILD_DEPENDENCIES: g++ cmake build-essential checkinstall zlib1g-dev libssl-dev
