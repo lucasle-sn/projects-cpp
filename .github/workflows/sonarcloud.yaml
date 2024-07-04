@@ -2,9 +2,8 @@ name: Sonarcloud Analysis Pipeline
 
 on:
   workflow_run:
-    workflows: ["Build Pipeline"]
-    types:
-      - completed
+    workflows: [Build Pipeline]
+    types: [completed]
   # push:
   #   branches:
   #     - master
@@ -19,7 +18,9 @@ env:
 jobs:
   sonar-cloud:
     name: Sonarcloud Analysis
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
     steps:

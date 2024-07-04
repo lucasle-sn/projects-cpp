@@ -2,9 +2,8 @@ name: Clang-format Pipeline
 
 on:
   workflow_run:
-    workflows: ["Build Pipeline"]
-    types:
-      - completed
+    workflows: [Build Pipeline]
+    types: [completed]
   # push:
   #   branches:
   #     - master
@@ -18,9 +17,10 @@ env:
 
 jobs:
   clang-format-check:
-    runs-on: ubuntu-latest
     name: Clang-format Check
-    timeout-minutes: 10
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
