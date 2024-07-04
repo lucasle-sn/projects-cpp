@@ -17,7 +17,7 @@ jobs:
     name: Sonarcloud Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [ubuntu-latest]
+    needs: [build-ubuntu]
     env:
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
     steps:
