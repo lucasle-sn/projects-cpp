@@ -19,8 +19,8 @@ jobs:
       matrix:
         build-type: ["Debug", "Release"]
         compiler: [
-          { c: "gcc-6", cxx: "g++-6", package: "gcc-6 g++-6" },
-          { c: "clang-6.0", cxx: "clang++-6.0", package: "clang-6.0" }
+          { c: "gcc-11", cxx: "g++-11", package: "gcc-11 g++-11" },
+          { c: "clang-14", cxx: "clang++-14", package: "clang-14" }
         ]
     name: Build & Test ${{ matrix.build-type }}
     timeout-minutes: 30
@@ -32,7 +32,9 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies
-        run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} ${{ matrix.compiler.package }}
+        run: |
+          sudo apt-get update &&
+          sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} ${{ matrix.compiler.package }}
 
       - name: Build
         run: |
