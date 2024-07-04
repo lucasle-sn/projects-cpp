@@ -1,26 +1,23 @@
 name: Clang-format Pipeline
 
 on:
-  workflow_run:
-    workflows: [Build Pipeline]
-    types: [completed]
-  # push:
-  #   branches:
-  #     - master
-  # pull_request:
-  #   branches:
-  #     - '*'
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
 
 env:
-  BUILD_DEPENDENCIES: g++ cmake build-essential checkinstall zlib1g-dev libssl-dev
+  BUILD_DEPENDENCIES: build-essential checkinstall zlib1g-dev libssl-dev
   BUILD_DIRECTORY: build
 
 jobs:
   clang-format-check:
     name: Clang-format Check
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    needs: [ubuntu-latest]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,7 +26,7 @@ jobs:
           submodules: true
 
       - name: Install dependencies
-        run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} doxygen graphviz
+        run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} clang-6.0
 
       - name: Check clang-format
         run: |
