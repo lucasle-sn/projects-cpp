@@ -1,4 +1,4 @@
-name: Clang-format Check Pipeline
+name: Clang-format Pipeline
 
 on:
   workflow_run:

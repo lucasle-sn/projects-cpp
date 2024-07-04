@@ -1,4 +1,4 @@
-name: Doxygen Check Pipeline
+name: Doxygen Pipeline
 
 on:
   workflow_run:
