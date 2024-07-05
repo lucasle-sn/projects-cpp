@@ -1,15 +1,17 @@
 add_executable(multithreading-interrupt
   main.cc
 )
+add_compile_options(-pthread)
 
 target_link_libraries(multithreading-interrupt
-  pthread
+  PRIVATE pthread
 )
 
 add_executable(multithreading-interrupt-cpp
   main_cpp.cc
 )
+add_compile_options(-pthread)
 
 target_link_libraries(multithreading-interrupt-cpp
-  pthread
+  PRIVATE pthread
 )
