@@ -1,4 +1,4 @@
-name: Sonarcloud Pipeline
+name: Sonarcloud Analysis Pipeline
 
 on:
   push:
@@ -7,15 +7,20 @@ on:
   pull_request:
     branches:
       - '*'
+    paths:
+      - '**.cc'
+      - '**.c'
+      - '**.h'
 
 env:
-  BUILD_DEPENDENCIES: g++ cmake build-essential checkinstall zlib1g-dev libssl-dev
+  BUILD_DEPENDENCIES: cmake build-essential checkinstall zlib1g-dev libssl-dev
   BUILD_DIRECTORY: build
 
 jobs:
   sonar-cloud:
     name: Sonarcloud Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
     env:
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
     steps:
@@ -24,12 +29,17 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies
-        run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} gcovr
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} clang-14 gcovr
 
       - name: Install sonar-scanner & build-wrapper
         uses: SonarSource/sonarcloud-github-c-cpp@v2
 
       - name: Run build-wrapper
+        env:
+          CC: clang
+          CXX: clang++
         run: |
           cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCODE_COVERAGE=ON -DCMAKE_C_FLAGS=--coverage -DCMAKE_CXX_FLAGS=--coverage
           build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ env.BUILD_DIRECTORY }} -j10
