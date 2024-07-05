@@ -3,7 +3,7 @@ add_executable(multithreading-interrupt
 )
 
 target_link_libraries(multithreading-interrupt
-  pthread
+  PRIVATE pthread
 )
 
 add_executable(multithreading-interrupt-cpp
@@ -11,5 +11,5 @@ add_executable(multithreading-interrupt-cpp
 )
 
 target_link_libraries(multithreading-interrupt-cpp
-  pthread
+  PRIVATE pthread
 )

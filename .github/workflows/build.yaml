@@ -1,0 +1,122 @@
+name: Build Pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+
+env:
+  BUILD_DEPENDENCIES: cmake build-essential checkinstall zlib1g-dev libssl-dev
+  BUILD_DIRECTORY: build
+
+jobs:
+  build-ubuntu:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04]
+        build-type: ["Debug", "Release"]
+        compiler: [
+          { c: "gcc-11", cxx: "g++-11", package: "gcc-11 g++-11" },
+          { c: "clang-14", cxx: "clang++-14", package: "clang-14" }
+        ]
+    runs-on: ${{ matrix.os }}
+    name: Build ${{ matrix.os }} / ${{ matrix.build-type }} / ${{ matrix.compiler.cxx }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: recursive
+
+      - name: Install dependencies
+        if: matrix.os == 'ubuntu-20.04'
+        run: |
+          if [[ "${{ matrix.compiler.c }}" == "gcc-11" ]]; then
+            sudo apt-get update
+            sudo apt-get install software-properties-common
+            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          fi 
+          if [[ "${{ matrix.compiler.c }}" == "clang-14" ]]; then
+            sudo apt update
+            sudo apt install -y wget gnupg
+            wget https://apt.llvm.org/llvm.sh
+            chmod +x llvm.sh
+            sudo ./llvm.sh 14
+          fi
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} ${{ matrix.compiler.package }}
+
+      - name: Build
+        run: |
+          cmake -S . -B ${{ env.BUILD_DIRECTORY }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DCMAKE_C_COMPILER=${{ matrix.compiler.c }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.compiler.cxx }}
+          cmake --build ${{ env.BUILD_DIRECTORY }} -j10
+
+      - name: Test
+        run: cd ${{ env.BUILD_DIRECTORY }} && ctest -j8 -T test --no-compress-output
+
+  clang-format-check:
+    name: Clang-format Check
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: [build-ubuntu]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: true
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} clang-14
+
+      - name: Check clang-format
+        run: |
+          FILES=$(find . -not -path "./third_party/*" -not -path "./build/*" \( -name '*.cc' -o -name '*.c' -o -name '*.h' \))
+          TMPFILE="./formatted_file"
+          for file in $FILES; do
+            clang-format -style=file $file > $TMPFILE
+            if ! diff $file $TMPFILE > /dev/null; then
+              echo "Clang-format failed on $file"
+              rm $TMPFILE
+              exit 1
+            fi 
+            rm $TMPFILE
+          done
+          echo "Clang-format check successful"
+
+  doxygen-check:
+    name: Doxygen Check
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: [build-ubuntu]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} clang-14 doxygen graphviz
+
+      - name: Check doxygen
+        env:
+          CC: clang
+          CXX: clang++
+        run: |
+          cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Debug -DDOXYGEN_BUILD_ENABLED=ON
+          cmake --build ${{ env.BUILD_DIRECTORY }} --target doxygen -- --no-print-directory
