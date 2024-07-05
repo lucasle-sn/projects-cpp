@@ -44,7 +44,7 @@ jobs:
         run: |
           # Run tests to generate coverage information
           cd ${{ env.BUILD_DIRECTORY }} && ctest -j8 -T test --no-compress-output
-          gcovr -r .. --sonarqube -o coverage.xml --exclude '../third_party/.*'
+          gcovr -r .. --sonarqube -o coverage.xml --exclude '../third_party/.*' --exclude '../coding_problems/.*'
 
       - name: Run sonar-scanner
         env:
