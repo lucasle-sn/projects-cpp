@@ -39,6 +39,7 @@ jobs:
             sudo apt-get update
             sudo apt-get install software-properties-common
             sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+            sudo apt-get install libc6 libc6-dev libpthread-stubs0-dev
           fi 
           if [[ "${{ matrix.compiler.c }}" == "clang-14" ]]; then
             sudo apt update

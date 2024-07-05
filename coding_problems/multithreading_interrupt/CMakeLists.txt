@@ -1,7 +1,6 @@
 add_executable(multithreading-interrupt
   main.cc
 )
-add_compile_options(-pthread)
 
 target_link_libraries(multithreading-interrupt
   PRIVATE pthread
