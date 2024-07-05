@@ -3,5 +3,5 @@ add_executable(thread-inherritance
 )
 
 target_link_libraries(thread-inherritance
-  PRIVATE pthread
+  PRIVATE Threads::Threads
 )
