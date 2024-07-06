@@ -88,4 +88,33 @@ TEST_F(TestThread, MultiThreads) {
   EXPECT_EQ(counter.get_count(), 300);
 }
 
+TEST_F(TestThread, Usage) {
+  class DerivedThread : public BaseThread {
+   public:
+    DerivedThread() : BaseThread("BaseThread") {}
+
+   protected:
+    void run() override { printf("Derived Thread\n"); }
+  };
+
+  {
+    // Fail to use
+    auto thread = std::make_unique<DerivedThread>();
+    ASSERT_FALSE(thread->running());
+    thread->deinit();
+    ASSERT_FALSE(thread->running());
+  }
+
+  {
+    // Correct usage
+    auto thread = std::make_unique<DerivedThread>();
+    thread->init();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    ASSERT_TRUE(thread->running());
+    thread->deinit();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    ASSERT_FALSE(thread->running());
+  }
+}
+
 }  // namespace

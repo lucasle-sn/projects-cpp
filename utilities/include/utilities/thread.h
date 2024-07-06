@@ -23,7 +23,7 @@ class Thread {
   /**
    * @brief Construct a new Thread object
    *
-   * @param threadName Name of thread
+   * @param thread_name Name of thread
    */
   explicit Thread(const char *thread_name) noexcept
       : thread_name_(thread_name){};
@@ -74,12 +74,12 @@ class Thread {
   /**
    * @brief Run Thread
    */
-  virtual void run(){};
+  virtual void run() = 0;
 
  private:
-  std::thread thread_;         ///< Main thread
-  const char *thread_name_;    ///< Name of thread
-  std::atomic<bool> running_;  ///< Running status
+  std::thread thread_;                ///< Main thread
+  const char *thread_name_;           ///< Name of thread
+  std::atomic<bool> running_{false};  ///< Running status
 };
 
 }  // namespace qle
