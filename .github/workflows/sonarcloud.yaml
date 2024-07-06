@@ -27,15 +27,15 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update && \
-          sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} clang-14 gcovr
+          sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} gcc-11 gcovr
 
       - name: Install sonar-scanner & build-wrapper
         uses: SonarSource/sonarcloud-github-c-cpp@v2
 
       - name: Run build-wrapper
         env:
-          CC: clang
-          CXX: clang++
+          CC: gcc-11
+          CXX: g++-11
         run: |
           cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCODE_COVERAGE=ON -DCMAKE_C_FLAGS=--coverage -DCMAKE_CXX_FLAGS=--coverage
           build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ env.BUILD_DIRECTORY }} -j10
