@@ -46,7 +46,6 @@ class Logger {
    * @brief Construct a new Logger object
    *
    * @param loggerName Logger name
-   * @param level Log level
    */
   explicit Logger(const char *loggerName) noexcept : loggerName_(loggerName) {}
 
