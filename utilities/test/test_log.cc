@@ -1,35 +1,15 @@
 #include <gtest/gtest.h>
-#include <map>
 #include <memory>
 
 #include <utilities/log.h>
+#include <utilities/test_fixture.h>
 
 namespace {
 
 std::mutex mtx_;
 const char *cLoggerName{"TestLog"};
 
-class TestFixture : public ::testing::Test {
- public:
-  // Function to capture the output from a function
-  template <typename Func, typename... Args>
-  std::map<std::string, std::string> capture_output(Func func, Args &&...args) {
-    std::map<std::string, std::string> output;
-
-    testing::internal::CaptureStdout();
-    testing::internal::CaptureStderr();
-
-    // Call the provided function with arguments
-    func(std::forward<Args>(args)...);
-
-    // Get the output from custom stdout/stderr catcher
-    output["stdout"] = testing::internal::GetCapturedStdout();
-    output["stderr"] = testing::internal::GetCapturedStderr();
-    return output;
-  }
-};
-
-class TestLog : public TestFixture {
+class TestLog : public qle::TestFixture {
  protected:
   void SetUp() { qle::Logger::set_log_level(qle::Logger::LogLevel::INFO); }
   void TearDown() { qle::Logger::set_log_level(qle::Logger::LogLevel::INFO); }
