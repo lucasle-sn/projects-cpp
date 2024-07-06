@@ -15,7 +15,7 @@ class Logger {
   /**
    * @brief LogLevel enum
    */
-  enum LogLevel { INFO = 0, WARNING, ERROR };
+  enum LogLevel { INFO = 0, DEBUG, WARNING, ERROR, DISABLED };
 
   /**
    * @brief Constructor deleted
@@ -46,16 +46,23 @@ class Logger {
    * @brief Construct a new Logger object
    *
    * @param loggerName Logger name
-   * @param level Log level
    */
-  explicit Logger(const char *loggerName,
-                  LogLevel level = LogLevel::INFO) noexcept
-      : loggerName_(loggerName), logLevel_(level) {}
+  explicit Logger(const char *loggerName) noexcept : loggerName_(loggerName) {}
 
   /**
    * @brief Destroy the Logger object
    */
   ~Logger() = default;
+
+  /**
+   * @brief Set the log level
+   *
+   * @param logLevel log level
+   */
+  static void set_log_level(LogLevel logLevel) {
+    std::lock_guard<std::mutex> guard(mutex_log_level_);
+    logLevel_ = logLevel;
+  }
 
   /**
    * @brief Log info to stdout
@@ -67,6 +74,19 @@ class Logger {
     va_list args;
     va_start(args, format);
     log(LogLevel::INFO, format, args);
+    va_end(args);
+  }
+
+  /**
+   * @brief Log debug to stderr
+   *
+   * @param format Format
+   * @param ...
+   */
+  void debug(const char *format, ...) noexcept {
+    va_list args;
+    va_start(args, format);
+    log(LogLevel::DEBUG, format, args);
     va_end(args);
   }
 
@@ -108,7 +128,7 @@ class Logger {
       return;
     }
 
-    std::lock_guard<std::mutex> guard(mutex_);
+    std::lock_guard<std::mutex> guard(mutex_log_);
     char logMessage[1024]{};
     vsnprintf(logMessage, sizeof(logMessage), format, args);
 
@@ -129,10 +149,12 @@ class Logger {
    * @param level Log level
    * @return const char*
    */
-  const char *logLevelToString(LogLevel level) noexcept {
+  const char *logLevelToString(LogLevel level) const noexcept {
     switch (level) {
       case LogLevel::INFO:
         return "info";
+      case LogLevel::DEBUG:
+        return "debug";
       case LogLevel::WARNING:
         return "warn";
       case LogLevel::ERROR:
@@ -141,9 +163,10 @@ class Logger {
     }
   }
 
-  const char *loggerName_;  ///< Logger name
-  LogLevel logLevel_;       ///< Log level
-  std::mutex mutex_;        ///< Mutex
+  const char *loggerName_;             ///< Logger name
+  std::mutex mutex_log_;               ///< Mutex logging
+  static std::mutex mutex_log_level_;  ///< Mutex logLevel
+  static LogLevel logLevel_;           ///< Log level
 };
 
 }  // namespace qle

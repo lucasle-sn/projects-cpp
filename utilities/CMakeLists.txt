@@ -1,5 +1,6 @@
 add_library(utilities
   src/bytestream.cc
+  src/log.cc
 )
 
 target_include_directories(utilities
