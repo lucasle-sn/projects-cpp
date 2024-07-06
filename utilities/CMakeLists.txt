@@ -1,5 +1,6 @@
 add_library(utilities
   src/bytestream.cc
+  src/thread.cc
 )
 
 target_include_directories(utilities
@@ -7,7 +8,7 @@ target_include_directories(utilities
 )
 
 target_link_libraries(utilities
-  public-types
+  public-types Threads::Threads
 )
 
 add_executable(unit-test-utilities

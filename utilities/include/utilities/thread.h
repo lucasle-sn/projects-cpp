@@ -1,8 +1,7 @@
 #ifndef UTILITIES_THREAD_H
 #define UTILITIES_THREAD_H
 
-#include <array>
-#include <chrono>
+#include <atomic>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -20,6 +19,14 @@ class Thread {
    * @brief Construct a new Thread object
    */
   Thread() = default;
+
+  /**
+   * @brief Construct a new Thread object
+   *
+   * @param threadName Name of thread
+   */
+  explicit Thread(const char *thread_name) noexcept
+      : thread_name_(thread_name){};
 
   /**
    * @brief Copy constructor deleted
@@ -49,27 +56,30 @@ class Thread {
   /**
    * @brief Initialize Thread object elements
    */
-  void init() { thread_ = std::thread(&Thread::run, this); }
+  void init() noexcept;
 
   /**
    * @brief Deinitialize Thread object elements
    */
-  void deinit() {
-    if (thread_.joinable()) {
-      thread_.join();
-    }
-  }
+  void deinit() noexcept;
 
- private:
+  /**
+   * @brief Get running status of thread
+   *
+   * @return true/false
+   */
+  bool running() const noexcept { return running_; }
+
+ protected:
   /**
    * @brief Run Thread
    */
-  virtual void run() = 0;
+  virtual void run(){};
 
-  /**
-   * @brief Thread that runs run()
-   */
-  std::thread thread_;
+ private:
+  std::thread thread_;         ///< Main thread
+  const char *thread_name_;    ///< Name of thread
+  std::atomic<bool> running_;  ///< Running status
 };
 
 }  // namespace qle
