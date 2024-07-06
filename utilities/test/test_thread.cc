@@ -35,7 +35,7 @@ class ThreadA : public BaseThread {
  private:
   void run() override {
     for (size_t i = 0; i < counter_limit_; i++) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      std::this_thread::sleep_for(std::chrono::milliseconds(2));
       counter_.increment();
     }
   }
@@ -55,7 +55,7 @@ class ThreadB : public BaseThread {
  private:
   void run() override {
     for (size_t i = 0; i < counter_limit_; i++) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      std::this_thread::sleep_for(std::chrono::milliseconds(2));
       counter_.increment();
     }
   }
@@ -74,14 +74,14 @@ TEST_F(TestThread, MultiThreads) {
   for (auto &thread : threads) {
     thread->init();
   }
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   ASSERT_TRUE(threads[0]->running());
   ASSERT_TRUE(threads[1]->running());
 
   for (auto &thread : threads) {
     thread->deinit();
   }
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   ASSERT_FALSE(threads[0]->running());
   ASSERT_FALSE(threads[1]->running());
 
@@ -106,42 +106,58 @@ TEST_F(TestThread, Usage) {
     ASSERT_FALSE(thread->running());
     thread->deinit();
     EXPECT_FALSE(thread->run_triggered());
-    ASSERT_FALSE(thread->running());
   }
-
   {
     // Correct usage
     auto thread = std::make_unique<DerivedThread>();
     thread->init();
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
     ASSERT_TRUE(thread->running());
     thread->deinit();
     EXPECT_TRUE(thread->run_triggered());
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
     ASSERT_FALSE(thread->running());
   }
 
-  class UnnamedThread : public BaseThread {
-   public:
-    UnnamedThread() : BaseThread() {}
-
-    bool run_triggered() const { return (count_ == 10); };
-
-   protected:
-    void run() override { count_ = 10; }
-    int count_ = 0;
-  };
-
   {
+    class UnnamedThread : public BaseThread {
+     public:
+      UnnamedThread() : BaseThread() {}
+
+      bool run_triggered() const { return (count_ == 10); };
+
+     protected:
+      void run() override { count_ = 10; }
+      int count_ = 0;
+    };
+
     // Still work properly
     auto thread = std::make_unique<UnnamedThread>();
     thread->init();
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
     ASSERT_TRUE(thread->running());
     thread->deinit();
     EXPECT_TRUE(thread->run_triggered());
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
     ASSERT_FALSE(thread->running());
+  }
+
+  {
+    class LengthyNameThread : public BaseThread {
+     public:
+      LengthyNameThread()
+          : BaseThread("This Thread has a really long long name") {}
+
+     protected:
+      void run() override{};
+    };
+
+    // Should have return error log for lengthy name
+    auto thread = std::make_unique<LengthyNameThread>();
+    thread->init();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    ASSERT_FALSE(thread->running());
+    thread->deinit();
   }
 }
 

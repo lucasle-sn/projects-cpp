@@ -11,24 +11,27 @@ namespace qle {
 
 void Thread::init() noexcept {
   thread_ = std::thread([this]() {
-    running_ = true;
     if ((thread_name_ != nullptr) && (strlen(thread_name_) != 0)) {
-      pthread_setname_np(thread_.native_handle(), thread_name_);
+      if (pthread_setname_np(thread_.native_handle(), thread_name_) != 0) {
+        logger->error("Fail to set up thread name \"%s\"", thread_name_);
+        running_ = false;
+        return;
+      }
     }
-
-    logger->info("Start thread %s", thread_name_);
+    running_ = true;
+    logger->debug("Start thread %s", thread_name_);
     run();
-    logger->info("End thread %s", thread_name_);
+    logger->debug("End thread %s", thread_name_);
   });
 }
 
 void Thread::deinit() noexcept {
   running_ = false;
   if (thread_.joinable()) {
-    logger->info("Joining thread %s", thread_name_);
+    logger->debug("Joining thread %s", thread_name_);
     thread_.join();
   } else {
-    logger->error("Thread %s is not joinable", thread_name_);
+    logger->debug("Thread %s is not joinable", thread_name_);
   }
 }
 
