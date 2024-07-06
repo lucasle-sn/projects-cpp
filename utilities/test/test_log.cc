@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <map>
 #include <memory>
 
 #include <utilities/log.h>
@@ -6,8 +7,29 @@
 namespace {
 
 std::mutex mtx_;
+const char *cLoggerName{"TestLog"};
 
-class TestLog : public ::testing::Test {
+class TestFixture : public ::testing::Test {
+ public:
+  // Function to capture the output from a function
+  template <typename Func, typename... Args>
+  std::map<std::string, std::string> capture_output(Func func, Args &&...args) {
+    std::map<std::string, std::string> output;
+
+    testing::internal::CaptureStdout();
+    testing::internal::CaptureStderr();
+
+    // Call the provided function with arguments
+    func(std::forward<Args>(args)...);
+
+    // Get the output from custom stdout/stderr catcher
+    output["stdout"] = testing::internal::GetCapturedStdout();
+    output["stderr"] = testing::internal::GetCapturedStderr();
+    return output;
+  }
+};
+
+class TestLog : public TestFixture {
  protected:
   void SetUp() { qle::Logger::set_log_level(qle::Logger::LogLevel::INFO); }
   void TearDown() { qle::Logger::set_log_level(qle::Logger::LogLevel::INFO); }
@@ -16,194 +38,185 @@ class TestLog : public ::testing::Test {
 TEST_F(TestLog, LogVariousLevels) {
   std::lock_guard<std::mutex> guard(mtx_);
 
-  const char *loggerName{"TestLog"};
-  auto logger = std::make_unique<qle::Logger>(loggerName);
+  auto logger = std::make_unique<qle::Logger>(cLoggerName);
   const char *msg{"Sample text"};
 
   {
-    testing::internal::CaptureStdout();
-    logger->info(msg);
-    auto out = testing::internal::GetCapturedStdout();
-
+    auto out = capture_output([&](const char *msg) { logger->info(msg); }, msg);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "info", loggerName, msg);
-    EXPECT_EQ(out, buff);
+    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "info", cLoggerName, msg);
+    EXPECT_EQ(out["stdout"], buff);
   }
 
   {
-    testing::internal::CaptureStderr();
-    logger->debug(msg);
-    auto out = testing::internal::GetCapturedStderr();
-
+    auto out =
+        capture_output([&](const char *msg) { logger->debug(msg); }, msg);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "debug", loggerName, msg);
-    EXPECT_EQ(out, buff);
+    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "debug", cLoggerName, msg);
+    EXPECT_EQ(out["stderr"], buff);
   }
-
   {
-    testing::internal::CaptureStderr();
-    logger->warn(msg);
-    auto out = testing::internal::GetCapturedStderr();
-
+    auto out = capture_output([&](const char *msg) { logger->warn(msg); }, msg);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "warn", loggerName, msg);
-    EXPECT_EQ(out, buff);
+    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "warn", cLoggerName, msg);
+    EXPECT_EQ(out["stderr"], buff);
   }
-
   {
-    testing::internal::CaptureStderr();
-    logger->error(msg);
-    auto out = testing::internal::GetCapturedStderr();
-
+    auto out =
+        capture_output([&](const char *msg) { logger->error(msg); }, msg);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "error", loggerName, msg);
-    EXPECT_EQ(out, buff);
+    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "error", cLoggerName, msg);
+    EXPECT_EQ(out["stderr"], buff);
   }
 }
 
 TEST_F(TestLog, LogMultipleTimes) {
   std::lock_guard<std::mutex> guard(mtx_);
 
-  const char *loggerName{"TestLog"};
-  auto logger = std::make_unique<qle::Logger>(loggerName);
+  auto logger = std::make_unique<qle::Logger>(cLoggerName);
   const char *msg{"Sample text"};
 
   for (size_t i = 0; i < 10; i++) {
-    char modifiedMsg[100]{};
-    snprintf(modifiedMsg, sizeof(modifiedMsg), "%s %zu", msg, i);
+    char modified_msg[100]{};
+    snprintf(modified_msg, sizeof(modified_msg), "%s %zu", msg, i);
 
     // Check log info
-    testing::internal::CaptureStdout();
-    logger->info(modifiedMsg);
-    auto out = testing::internal::GetCapturedStdout();
-
-    char buffInfo[1024]{};
-    snprintf(buffInfo, sizeof(buffInfo), "[%s] %s: %s\n", "info", loggerName,
-             modifiedMsg);
-    EXPECT_EQ(out, buffInfo);
+    auto out = capture_output([&](const char *msg) { logger->info(msg); },
+                              modified_msg);
+    char buff_out[1024]{};
+    snprintf(buff_out, sizeof(buff_out), "[%s] %s: %s\n", "info", cLoggerName,
+             modified_msg);
+    EXPECT_EQ(out["stdout"], buff_out);
 
     // Check log error
-    testing::internal::CaptureStderr();
-    logger->error(modifiedMsg);
-    out = testing::internal::GetCapturedStderr();
-
-    char buffError[1024]{};
-    snprintf(buffError, sizeof(buffError), "[%s] %s: %s\n", "error", loggerName,
-             modifiedMsg);
-    EXPECT_EQ(out, buffError);
+    out = capture_output([&](const char *msg) { logger->error(msg); },
+                         modified_msg);
+    char buff_err[1024]{};
+    snprintf(buff_err, sizeof(buff_err), "[%s] %s: %s\n", "error", cLoggerName,
+             modified_msg);
+    EXPECT_EQ(out["stderr"], buff_err);
   }
 }
 
 TEST_F(TestLog, LogHigherLevel) {
   std::lock_guard<std::mutex> guard(mtx_);
 
-  const char *loggerName{"TestLog"};
   qle::Logger::set_log_level(qle::Logger::LogLevel::WARNING);
-  auto loggerWarn = std::make_unique<qle::Logger>(loggerName);
+  auto logger = std::make_unique<qle::Logger>(cLoggerName);
   const char *msg{"Sample text"};
 
   {
     // Expect NO Log info returned
-    testing::internal::CaptureStdout();
-    loggerWarn->info(msg);
-    auto out = testing::internal::GetCapturedStdout();
-    EXPECT_EQ(out, "");
+    auto out = capture_output([&](const char *msg) { logger->info(msg); }, msg);
+    EXPECT_EQ(out["stdout"], "");
   }
 
   {
     // Expect Log warn returned
-    testing::internal::CaptureStderr();
-    loggerWarn->warn(msg);
-    auto out = testing::internal::GetCapturedStderr();
-
+    auto out = capture_output([&](const char *msg) { logger->warn(msg); }, msg);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "warn", loggerName, msg);
-    EXPECT_EQ(out, buff);
+    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "warn", cLoggerName, msg);
+    EXPECT_EQ(out["stderr"], buff);
   }
 
   {
     // Expect Log error returned
-    testing::internal::CaptureStderr();
-    loggerWarn->error(msg);
-    auto out = testing::internal::GetCapturedStderr();
-
+    auto out =
+        capture_output([&](const char *msg) { logger->error(msg); }, msg);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "error", loggerName, msg);
-    EXPECT_EQ(out, buff);
+    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "error", cLoggerName, msg);
+    EXPECT_EQ(out["stderr"], buff);
   }
 
   qle::Logger::set_log_level(qle::Logger::LogLevel::ERROR);
-  auto loggerError = std::make_unique<qle::Logger>(loggerName);
   {
     // Expect NO Log info returned
-    testing::internal::CaptureStdout();
-    loggerError->info(msg);
-    auto out = testing::internal::GetCapturedStdout();
-    EXPECT_EQ(out, "");
+    auto out = capture_output([&](const char *msg) { logger->info(msg); }, msg);
+    EXPECT_EQ(out["stdout"], "");
   }
 
   {
-    // Expect Log warn returned
-    testing::internal::CaptureStderr();
-    loggerError->warn(msg);
-    auto out = testing::internal::GetCapturedStderr();
-    EXPECT_EQ(out, "");
+    // Expect NO Log warn returned
+    auto out = capture_output([&](const char *msg) { logger->warn(msg); }, msg);
+    EXPECT_EQ(out["stderr"], "");
   }
 
   {
     // Expect Log error returned
-    testing::internal::CaptureStderr();
-    loggerError->error(msg);
-    auto out = testing::internal::GetCapturedStderr();
-
+    auto out =
+        capture_output([&](const char *msg) { logger->error(msg); }, msg);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "error", loggerName, msg);
-    EXPECT_EQ(out, buff);
+    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "error", cLoggerName, msg);
+    EXPECT_EQ(out["stderr"], buff);
+  }
+
+  qle::Logger::set_log_level(qle::Logger::LogLevel::DISABLED);
+  {
+    // Expect NO Log error returned
+    auto out =
+        capture_output([&](const char *msg) { logger->error(msg); }, msg);
+    EXPECT_EQ(out["stderr"], "");
   }
 }
 
 TEST_F(TestLog, LogComplexFormat) {
   std::lock_guard<std::mutex> guard(mtx_);
 
-  const char *loggerName{"TestLog"};
-  auto logger = std::make_unique<qle::Logger>(loggerName);
+  auto logger = std::make_unique<qle::Logger>(cLoggerName);
   int tmp;
   const char *format{"%s %zu %d %p"};
   const char *expected_format{"[%s] %s: %s %zu %d %p\n"};
 
   const char *msg{"Sample text"};
-  const size_t var = 1;
-  {
-    testing::internal::CaptureStdout();
-    logger->info(format, msg, var, -2, &tmp);
-    auto out = testing::internal::GetCapturedStdout();
+  const size_t size_var = 1;
+  const int int_var = -2;
 
+  {
+    auto out = capture_output(
+        [&](const char *msg, size_t size_var, int int_var, int *ptr) {
+          logger->info(format, msg, size_var, int_var, ptr);
+        },
+        msg, size_var, int_var, &tmp);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), expected_format, "info", loggerName, msg, var,
-             -2, &tmp);
-    EXPECT_EQ(out, buff);
+    snprintf(buff, sizeof(buff), expected_format, "info", cLoggerName, msg,
+             size_var, int_var, &tmp);
+    EXPECT_EQ(out["stdout"], buff);
   }
 
   {
-    testing::internal::CaptureStderr();
-    logger->warn(format, msg, var, -2, &tmp);
-    auto out = testing::internal::GetCapturedStderr();
-
+    auto out = capture_output(
+        [&](const char *msg, size_t size_var, int int_var, int *ptr) {
+          logger->debug(format, msg, size_var, int_var, ptr);
+        },
+        msg, size_var, int_var, &tmp);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), expected_format, "warn", loggerName, msg, var,
-             -2, &tmp);
-    EXPECT_EQ(out, buff);
+    snprintf(buff, sizeof(buff), expected_format, "debug", cLoggerName, msg,
+             size_var, int_var, &tmp);
+    EXPECT_EQ(out["stderr"], buff);
   }
 
   {
-    testing::internal::CaptureStderr();
-    logger->error(format, msg, var, -2, &tmp);
-    auto out = testing::internal::GetCapturedStderr();
-
+    auto out = capture_output(
+        [&](const char *msg, size_t size_var, int int_var, int *ptr) {
+          logger->warn(format, msg, size_var, int_var, ptr);
+        },
+        msg, size_var, int_var, &tmp);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), expected_format, "error", loggerName, msg, var,
-             -2, &tmp);
-    EXPECT_EQ(out, buff);
+    snprintf(buff, sizeof(buff), expected_format, "warn", cLoggerName, msg,
+             size_var, int_var, &tmp);
+    EXPECT_EQ(out["stderr"], buff);
+  }
+
+  {
+    auto out = capture_output(
+        [&](const char *msg, size_t size_var, int int_var, int *ptr) {
+          logger->error(format, msg, size_var, int_var, ptr);
+        },
+        msg, size_var, int_var, &tmp);
+    char buff[1024]{};
+    snprintf(buff, sizeof(buff), expected_format, "error", cLoggerName, msg,
+             size_var, int_var, &tmp);
+    EXPECT_EQ(out["stderr"], buff);
   }
 }
 
