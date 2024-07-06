@@ -93,8 +93,11 @@ TEST_F(TestThread, Usage) {
    public:
     DerivedThread() : BaseThread("BaseThread") {}
 
+    bool run_triggered() const { return (count_ == 500); };
+
    protected:
-    void run() override { printf("Derived Thread\n"); }
+    void run() override { count_ = 500; }
+    int count_ = 0;
   };
 
   {
@@ -102,6 +105,7 @@ TEST_F(TestThread, Usage) {
     auto thread = std::make_unique<DerivedThread>();
     ASSERT_FALSE(thread->running());
     thread->deinit();
+    EXPECT_FALSE(thread->run_triggered());
     ASSERT_FALSE(thread->running());
   }
 
@@ -112,6 +116,30 @@ TEST_F(TestThread, Usage) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     ASSERT_TRUE(thread->running());
     thread->deinit();
+    EXPECT_TRUE(thread->run_triggered());
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    ASSERT_FALSE(thread->running());
+  }
+
+  class UnnamedThread : public BaseThread {
+   public:
+    UnnamedThread() : BaseThread() {}
+
+    bool run_triggered() const { return (count_ == 10); };
+
+   protected:
+    void run() override { count_ = 10; }
+    int count_ = 0;
+  };
+
+  {
+    // Still work properly
+    auto thread = std::make_unique<UnnamedThread>();
+    thread->init();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    ASSERT_TRUE(thread->running());
+    thread->deinit();
+    EXPECT_TRUE(thread->run_triggered());
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     ASSERT_FALSE(thread->running());
   }

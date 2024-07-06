@@ -18,7 +18,7 @@ class Thread {
   /**
    * @brief Construct a new Thread object
    */
-  Thread() = default;
+  Thread() noexcept : thread_name_(""){};
 
   /**
    * @brief Construct a new Thread object
@@ -26,7 +26,7 @@ class Thread {
    * @param thread_name Name of thread
    */
   explicit Thread(const char *thread_name) noexcept
-      : thread_name_(thread_name){};
+      : thread_name_(thread_name ? thread_name : ""){};
 
   /**
    * @brief Copy constructor deleted
@@ -78,7 +78,7 @@ class Thread {
 
  private:
   std::thread thread_;                ///< Main thread
-  const char *thread_name_;           ///< Name of thread
+  const char *thread_name_{nullptr};  ///< Name of thread
   std::atomic<bool> running_{false};  ///< Running status
 };
 
