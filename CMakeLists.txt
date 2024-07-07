@@ -9,6 +9,8 @@ option(DOXYGEN_BUILD_ENABLED "Enable Doxygen Build" OFF)
 message(STATUS "Enable testing")
 enable_testing()
 
+find_package(Threads REQUIRED)
+
 # Add third-party libraries
 add_subdirectory(third_party/gtest)
 

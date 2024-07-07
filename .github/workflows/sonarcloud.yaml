@@ -1,4 +1,4 @@
-name: Sonarcloud Pipeline
+name: Sonarcloud Analysis Pipeline
 
 on:
   push:
@@ -9,13 +9,14 @@ on:
       - '*'
 
 env:
-  BUILD_DEPENDENCIES: g++ cmake build-essential checkinstall zlib1g-dev libssl-dev
+  BUILD_DEPENDENCIES: cmake build-essential checkinstall zlib1g-dev libssl-dev
   BUILD_DIRECTORY: build
 
 jobs:
   sonar-cloud:
     name: Sonarcloud Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
     env:
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
     steps:
@@ -24,12 +25,17 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies
-        run: sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} gcovr
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} gcc-11 gcovr
 
       - name: Install sonar-scanner & build-wrapper
         uses: SonarSource/sonarcloud-github-c-cpp@v2
 
       - name: Run build-wrapper
+        env:
+          CC: gcc-11
+          CXX: g++-11
         run: |
           cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCODE_COVERAGE=ON -DCMAKE_C_FLAGS=--coverage -DCMAKE_CXX_FLAGS=--coverage
           build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build ${{ env.BUILD_DIRECTORY }} -j10
@@ -38,7 +44,7 @@ jobs:
         run: |
           # Run tests to generate coverage information
           cd ${{ env.BUILD_DIRECTORY }} && ctest -j8 -T test --no-compress-output
-          gcovr -r .. --sonarqube -o coverage.xml --exclude '../third_party/.*'
+          gcovr -r .. --sonarqube -o coverage.xml --exclude '../third_party/.*' --exclude '../coding_problems/.*'
 
       - name: Run sonar-scanner
         env:
@@ -56,4 +62,4 @@ jobs:
             -Dsonar.sources=./ \
             -Dsonar.tests=./ \
             -Dsonar.test.inclusions=**/test/**/* \
-            -Dsonar.exclusions=**/test/**/*
+            -Dsonar.exclusions=**/test/**/*,coding_problems/**/*,design_pattern/**/*
