@@ -70,9 +70,9 @@ class Server {
   /**
    * @brief Initialize TCP server
    *
-   * @return ErrorCodes
+   * @return ErrorCode
    */
-  ErrorCodes init() noexcept;
+  ErrorCode init() noexcept;
 
   /**
    * @brief Main process TCP server

@@ -39,17 +39,17 @@ TEST_F(TestTcp, BasicUsage) {
   auto run_server = [&]() {
     auto server =
         std::make_unique<ServerAccessor>(cPort, qle::Server::Mode::BLOCKING, 3);
-    ASSERT_EQ(server->init(), qle::ErrorCodes::SUCCESS);
+    ASSERT_EQ(server->init(), qle::ErrorCode::SUCCESS);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     server->run();
   };
 
   auto run_client = [&]() {
     auto client = std::make_unique<qle::Client>(cLocalhost, cPort);
-    ASSERT_EQ(client->init(), qle::ErrorCodes::SUCCESS);
+    ASSERT_EQ(client->init(), qle::ErrorCode::SUCCESS);
     std::this_thread::sleep_for(
         std::chrono::milliseconds(1000));  // wait for server up
-    ASSERT_EQ(client->connectServer(), qle::ErrorCodes::SUCCESS);
+    ASSERT_EQ(client->connectServer(), qle::ErrorCode::SUCCESS);
 
     EXPECT_EQ(client->sendData(str, sizeof(str)), sizeof(str));
 

@@ -17,12 +17,12 @@ namespace qle {
 Server::Server(int port, Mode mode, int timeout_sec) noexcept
     : port_(port), mode_(mode), timeout_sec_(timeout_sec) {}
 
-ErrorCodes Server::init() noexcept {
+ErrorCode Server::init() noexcept {
   // Create an AF_INET (v4) stream socket to receive incoming connections on
   listener_fd_ = socket(AF_INET, SOCK_STREAM, 0);
   if (listener_fd_ == -1) {
     logger->error("Socket creation failed");
-    return ErrorCodes::ERROR;
+    return ErrorCode::ERROR;
   }
 
   // Set socket options: Allow socket descriptor to be reuseable
@@ -31,7 +31,7 @@ ErrorCodes Server::init() noexcept {
                  sizeof(opt)) == -1) {
     logger->error("Socket setup failed");
     close(listener_fd_);
-    return ErrorCodes::ERROR;
+    return ErrorCode::ERROR;
   }
 
   server_addr_.sin_family = AF_INET;
@@ -43,13 +43,13 @@ ErrorCodes Server::init() noexcept {
            sizeof(server_addr_)) < 0) {
     logger->error("Socket binding failed");
     close(listener_fd_);
-    return ErrorCodes::ERROR;
+    return ErrorCode::ERROR;
   }
 
   if (listen(listener_fd_, 3) < 0) {
     logger->error("Socket listening failed");
     close(listener_fd_);
-    return ErrorCodes::ERROR;
+    return ErrorCode::ERROR;
   }
 
   // Set the timeout for the accept call
@@ -62,14 +62,14 @@ ErrorCodes Server::init() noexcept {
                    (const char *)&timeout, sizeof(timeout)) < 0) {
       logger->error("Fail to setup timeout for connection accept");
       close(listener_fd_);
-      return ErrorCodes::ERROR;
+      return ErrorCode::ERROR;
     }
     logger->debug("Setup timeout %d seconds", timeout_sec_);
   }
 
   logger->info("Successfully bind port %d", port_);
   isRunning_ = true;
-  return ErrorCodes::SUCCESS;
+  return ErrorCode::SUCCESS;
 }
 
 void Server::stop() noexcept {

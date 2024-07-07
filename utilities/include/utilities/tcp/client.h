@@ -60,16 +60,16 @@ class Client {
   /**
    * @brief Initialize TCP client
    *
-   * @return ErrorCodes
+   * @return ErrorCode
    */
-  ErrorCodes init() noexcept;
+  ErrorCode init() noexcept;
 
   /**
    * @brief Connect client to server
    *
    * @return true/false for success/failed
    */
-  ErrorCodes connectServer() noexcept;
+  ErrorCode connectServer() noexcept;
 
   /**
    * @brief Terminate connection

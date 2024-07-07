@@ -10,11 +10,11 @@ namespace qle {
 Client::Client(const char *server_address, int port) noexcept
     : server_address_(server_address), port_(port) {}
 
-ErrorCodes Client::init() noexcept {
+ErrorCode Client::init() noexcept {
   sock_ = socket(AF_INET, SOCK_STREAM, 0);
   if (sock_ == -1) {
     logger->error("Socket creation failed");
-    return ErrorCodes::ERROR;
+    return ErrorCode::ERROR;
   }
 
   server_addr_.sin_family = AF_INET;
@@ -24,20 +24,20 @@ ErrorCodes Client::init() noexcept {
   if (inet_pton(AF_INET, server_address_, &server_addr_.sin_addr) <= 0) {
     logger->error("Invalid address or Address not supported");
     close(sock_);
-    return ErrorCodes::ERROR;
+    return ErrorCode::ERROR;
   }
   logger->info("Successfully initialize client");
-  return ErrorCodes::SUCCESS;
+  return ErrorCode::SUCCESS;
 }
 
-ErrorCodes Client::connectServer() noexcept {
+ErrorCode Client::connectServer() noexcept {
   if (connect(sock_, (struct sockaddr *)&server_addr_, sizeof(server_addr_)) <
       0) {
     logger->error("Connection Failed");
     close(sock_);
-    return ErrorCodes::ERROR;
+    return ErrorCode::ERROR;
   }
-  return ErrorCodes::SUCCESS;
+  return ErrorCode::SUCCESS;
 }
 
 void Client::disconnectServer() noexcept {
