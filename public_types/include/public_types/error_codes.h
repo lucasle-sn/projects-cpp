@@ -12,7 +12,10 @@ enum class ErrorCode {
   INVALID,  ///< Invalid
 };
 
-class ErrorHandler {
+/**
+ * @brief ErrorCode Handler
+ */
+class ErrorCodeHandler {
  public:
   /**
    * @brief Convert ErrorCode to string

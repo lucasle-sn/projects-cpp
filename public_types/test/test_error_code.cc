@@ -3,18 +3,18 @@
 #include <gtest/gtest.h>
 
 using ErrorCode = qle::ErrorCode;
-using ErrorHandler = qle::ErrorHandler;
+using ErrorCodeHandler = qle::ErrorCodeHandler;
 
 namespace {
 
 class TestErrorCode : public ::testing::Test {};
 
 TEST_F(TestErrorCode, TestToString) {
-  EXPECT_TRUE(strcmp(ErrorHandler::error_code_to_string(ErrorCode::SUCCESS),
+  EXPECT_TRUE(strcmp(ErrorCodeHandler::error_code_to_string(ErrorCode::SUCCESS),
                      "Success") == 0);
-  EXPECT_TRUE(strcmp(ErrorHandler::error_code_to_string(ErrorCode::ERROR),
+  EXPECT_TRUE(strcmp(ErrorCodeHandler::error_code_to_string(ErrorCode::ERROR),
                      "Error") == 0);
-  EXPECT_TRUE(strcmp(ErrorHandler::error_code_to_string(ErrorCode::INVALID),
+  EXPECT_TRUE(strcmp(ErrorCodeHandler::error_code_to_string(ErrorCode::INVALID),
                      "Invalid") == 0);
 }
 

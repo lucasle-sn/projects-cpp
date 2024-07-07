@@ -58,6 +58,8 @@ class Server {
    * @brief Construct a new Server object
    *
    * @param port Binding port
+   * @param mode Blocking / nonblocking mode
+   * @param timeout_sec Connection accept timeout
    */
   explicit Server(uint16_t port, Mode mode = Mode::BLOCKING,
                   int32_t timeout_sec = -1) noexcept;
