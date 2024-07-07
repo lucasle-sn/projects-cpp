@@ -25,11 +25,11 @@ class Counter {
 };
 
 /**
- * @brief ThreadA inherrited from Thread class
+ * @brief CounterThread inherrited from Thread class
  */
-class ThreadA : public BaseThread {
+class CounterThread : public BaseThread {
  public:
-  explicit ThreadA(const char *name, Counter &counter, int counter_limit)
+  explicit CounterThread(const char *name, Counter &counter, int counter_limit)
       : BaseThread(name), counter_(counter), counter_limit_(counter_limit) {}
 
  private:
@@ -44,32 +44,29 @@ class ThreadA : public BaseThread {
   int counter_limit_ = 0;
 };
 
-/**
- * @brief ThreadB inherrited from Thread class
- */
-class ThreadB : public BaseThread {
+class TestingThread : public BaseThread {
  public:
-  explicit ThreadB(const char *name, Counter &counter, int counter_limit)
-      : BaseThread(name), counter_(counter), counter_limit_(counter_limit) {}
+  explicit TestingThread(const char *name, int expected_count = 100)
+      : BaseThread(name), expected_count_(expected_count) {}
+  explicit TestingThread(int expected_count)
+      : BaseThread(), expected_count_(expected_count) {}
+
+  /// Check whether run() function is triggered
+  bool run_triggered() const { return (count_ == expected_count_); };
 
  private:
-  void run() override {
-    for (size_t i = 0; i < counter_limit_; i++) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(2));
-      counter_.increment();
-    }
-  }
+  void run() override { count_ = expected_count_; }
 
-  Counter &counter_;
-  int counter_limit_ = 0;
+  int count_ = 0;
+  int expected_count_ = -1;
 };
 
 TEST_F(TestThread, MultiThreads) {
   Counter counter;
 
   std::array<std::unique_ptr<BaseThread>, 2> threads;
-  threads.at(0) = std::make_unique<ThreadA>("ThreadA", counter, 100);
-  threads.at(1) = std::make_unique<ThreadB>("ThreadB", counter, 200);
+  threads.at(0) = std::make_unique<CounterThread>("ThreadA", counter, 100);
+  threads.at(1) = std::make_unique<CounterThread>("ThreadB", counter, 200);
 
   for (auto &thread : threads) {
     thread->init();
@@ -89,57 +86,32 @@ TEST_F(TestThread, MultiThreads) {
 }
 
 TEST_F(TestThread, Usage) {
-  class DerivedThread : public BaseThread {
-   public:
-    DerivedThread() : BaseThread("BaseThread") {}
-
-    bool run_triggered() const { return (count_ == 500); };
-
-   protected:
-    void run() override { count_ = 500; }
-    int count_ = 0;
-  };
-
   {
     // Fail to use
-    auto thread = std::make_unique<DerivedThread>();
+    auto thread = std::make_unique<TestingThread>("Thread", 101);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
     ASSERT_FALSE(thread->running());
     thread->deinit();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
     EXPECT_FALSE(thread->run_triggered());
   }
-  {
-    // Correct usage
-    auto thread = std::make_unique<DerivedThread>();
-    thread->init();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    ASSERT_TRUE(thread->running());
-    thread->deinit();
-    EXPECT_TRUE(thread->run_triggered());
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    ASSERT_FALSE(thread->running());
-  }
 
   {
-    class UnnamedThread : public BaseThread {
-     public:
-      UnnamedThread() : BaseThread() {}
+    // Correct usage with named thread, unnamed thread & nullptr named thread
+    std::array<std::unique_ptr<TestingThread>, 3> threads;
+    threads[0] = std::make_unique<TestingThread>("NamedThread", 300);  // Named
+    threads[1] = std::make_unique<TestingThread>(222);          // Unnamed
+    threads[2] = std::make_unique<TestingThread>(nullptr, -1);  // nullptr
 
-      bool run_triggered() const { return (count_ == 10); };
-
-     protected:
-      void run() override { count_ = 10; }
-      int count_ = 0;
-    };
-
-    // Still work properly
-    auto thread = std::make_unique<UnnamedThread>();
-    thread->init();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    ASSERT_TRUE(thread->running());
-    thread->deinit();
-    EXPECT_TRUE(thread->run_triggered());
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    ASSERT_FALSE(thread->running());
+    for (auto &thread : threads) {
+      thread->init();
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      ASSERT_TRUE(thread->running());
+      thread->deinit();
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      EXPECT_TRUE(thread->run_triggered());
+      ASSERT_FALSE(thread->running());
+    }
   }
 
   {

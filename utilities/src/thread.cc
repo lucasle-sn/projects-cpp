@@ -1,22 +1,20 @@
-#include <utilities/thread.h>
-
 #include <utilities/log.h>
+#include <utilities/thread.h>
 
 #include <cstring>
 #include <memory>
 
-static auto logger = std::make_unique<qle::Logger>("Thread");
+static const auto logger = std::make_unique<qle::Logger>("Thread");
 
 namespace qle {
 
 void Thread::init() noexcept {
   thread_ = std::thread([this]() {
-    if ((thread_name_ != nullptr) && (strlen(thread_name_) != 0)) {
-      if (pthread_setname_np(thread_.native_handle(), thread_name_) != 0) {
-        logger->error("Fail to set up thread name \"%s\"", thread_name_);
-        running_ = false;
-        return;
-      }
+    if ((thread_name_ != nullptr) && (strlen(thread_name_) != 0) &&
+        (pthread_setname_np(thread_.native_handle(), thread_name_) != 0)) {
+      logger->error("Fail to set up thread name \"%s\"", thread_name_);
+      running_ = false;
+      return;
     }
     running_ = true;
     logger->debug("Start thread %s", thread_name_);
