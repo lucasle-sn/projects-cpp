@@ -3,11 +3,11 @@
 
 #include <memory>
 
-static auto logger = std::make_unique<qle::Logger>("Client");
+static const auto logger = std::make_unique<qle::Logger>("Client");
 
 namespace qle {
 
-Client::Client(const char *server_address, int port) noexcept
+Client::Client(const char *server_address, uint16_t port) noexcept
     : server_address_(server_address), port_(port) {}
 
 ErrorCode Client::init() noexcept {
@@ -48,13 +48,11 @@ void Client::disconnectServer() noexcept {
   }
 }
 
-ssize_t Client::sendData(const void *data, size_t data_size) noexcept {
-  // logger->info("Sending data %s", (const char *)data);
+ssize_t Client::sendData(const void *data, size_t data_size) const noexcept {
   return send(sock_, data, data_size, 0);
 }
 
-ssize_t Client::receiveData(void *buffer, size_t buffer_size) noexcept {
-  // logger->info("Receiving data %s", (char *)buffer);
+ssize_t Client::receiveData(void *buffer, size_t buffer_size) const noexcept {
   return recv(sock_, buffer, buffer_size, 0);
 }
 

@@ -50,12 +50,12 @@ class Client {
    * @param address Server IP address
    * @param port Server binding port
    */
-  explicit Client(const char *address, int port) noexcept;
+  explicit Client(const char *address, uint16_t port) noexcept;
 
   /**
    * @brief Destroy the Client object
    */
-  ~Client() noexcept { disconnectServer(); }
+  virtual ~Client() noexcept { disconnectServer(); }
 
   /**
    * @brief Initialize TCP client
@@ -83,7 +83,7 @@ class Client {
    * @param data_size Size of data
    * @return Size of data sent
    */
-  ssize_t sendData(const void *data, size_t data_size) noexcept;
+  ssize_t sendData(const void *data, size_t data_size) const noexcept;
 
   /**
    * @brief Receive data from server
@@ -92,12 +92,12 @@ class Client {
    * @param buffer_size Size of buffer
    * @return Size of data received
    */
-  ssize_t receiveData(void *buffer, size_t buffer_size) noexcept;
+  ssize_t receiveData(void *buffer, size_t buffer_size) const noexcept;
 
  private:
-  int sock_;                        ///< Socket
+  int32_t sock_;                    ///< Socket
   const char *server_address_;      ///< Server IP address
-  int port_;                        ///< Server binding port
+  uint16_t port_;                   ///< Server binding port
   struct sockaddr_in server_addr_;  ///< Server configuration info
 };
 

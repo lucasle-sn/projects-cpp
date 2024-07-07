@@ -59,13 +59,13 @@ class Server {
    *
    * @param port Binding port
    */
-  explicit Server(int port, Mode mode = Mode::BLOCKING,
-                  int timeout_sec = -1) noexcept;
+  explicit Server(uint16_t port, Mode mode = Mode::BLOCKING,
+                  int32_t timeout_sec = -1) noexcept;
 
   /**
    * @brief Destroy the Server object
    */
-  ~Server() noexcept { stop(); };
+  virtual ~Server() noexcept { stop(); };
 
   /**
    * @brief Initialize TCP server
@@ -90,30 +90,28 @@ class Server {
    *
    * @param socket Client
    */
-  virtual void internal_run(int socket) noexcept { close(socket); };
-
- protected:
-  std::atomic<bool> isRunning_{false};  ///< Running status
+  virtual void internal_run(int32_t socket) noexcept { close(socket); };
 
  private:
   /**
    * @brief Accept an incoming connection
    *
-   * @return int client socket
+   * @return client socket
    */
-  int accept_connection() noexcept;
+  int32_t accept_connection() noexcept;
 
   /**
    * @brief Main process blocking mode
    */
   void run_blocking() noexcept;
 
-  int listener_fd_;                   ///< Listener fd
-  int port_;                          ///< Binding port
-  struct sockaddr_in server_addr_;    ///< Server config
-  std::vector<std::thread> threads_;  ///< Client threads
-  Mode mode_;                         ///< connection handling mode
-  int timeout_sec_;                   ///< accecpt connection timeout
+  int32_t listener_fd_;                 ///< Listener fd
+  uint16_t port_;                       ///< Binding port
+  struct sockaddr_in server_addr_;      ///< Server config
+  std::atomic<bool> isRunning_{false};  ///< Running status
+  std::vector<std::thread> threads_;    ///< Client threads
+  Mode mode_;                           ///< connection handling mode
+  int32_t timeout_sec_;                 ///< accecpt connection timeout
 };
 
 }  // namespace qle

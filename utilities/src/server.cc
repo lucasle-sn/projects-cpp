@@ -14,7 +14,7 @@ static const auto logger = std::make_unique<qle::Logger>("Server");
 
 namespace qle {
 
-Server::Server(int port, Mode mode, int timeout_sec) noexcept
+Server::Server(uint16_t port, Mode mode, int32_t timeout_sec) noexcept
     : port_(port), mode_(mode), timeout_sec_(timeout_sec) {}
 
 ErrorCode Server::init() noexcept {
@@ -26,7 +26,7 @@ ErrorCode Server::init() noexcept {
   }
 
   // Set socket options: Allow socket descriptor to be reuseable
-  int opt = 1;
+  int32_t opt = 1;
   if (setsockopt(listener_fd_, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
                  sizeof(opt)) == -1) {
     logger->error("Socket setup failed");
@@ -90,12 +90,12 @@ void Server::run() noexcept {
   }
 }
 
-int Server::accept_connection() noexcept {
+int32_t Server::accept_connection() noexcept {
   // Accept an incoming connection that queues up on the listening socket
   struct sockaddr_in peer_addr;
-  int peer_addr_len = sizeof(peer_addr);
-  int client_socket = accept(listener_fd_, (struct sockaddr *)&peer_addr,
-                             (socklen_t *)&peer_addr_len);
+  int16_t peer_addr_len = sizeof(peer_addr);
+  int32_t client_socket = accept(listener_fd_, (struct sockaddr *)&peer_addr,
+                                 (socklen_t *)&peer_addr_len);
   if (client_socket < 0) {
     logger->error("Listener accept failed");
     return client_socket;
