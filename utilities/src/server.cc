@@ -10,7 +10,7 @@
  *
  */
 
-static auto logger = std::make_unique<qle::Logger>("Server");
+static const auto logger = std::make_unique<qle::Logger>("Server");
 
 namespace qle {
 
@@ -64,7 +64,7 @@ ErrorCodes Server::init() noexcept {
       close(listener_fd_);
       return ErrorCodes::ERROR;
     }
-    logger->info("Setup timeout %d seconds", timeout_sec_);
+    logger->debug("Setup timeout %d seconds", timeout_sec_);
   }
 
   logger->info("Successfully bind port %d", port_);
