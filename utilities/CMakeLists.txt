@@ -1,6 +1,8 @@
 add_library(utilities
   src/bytestream.cc
+  src/client.cc
   src/log.cc
+  src/server.cc
   src/thread.cc
 )
 
@@ -15,6 +17,7 @@ target_link_libraries(utilities
 add_executable(unit-test-utilities
   test/test_bytestream.cc
   test/test_log.cc
+  test/test_tcp.cc
   test/test_thread.cc
 )
 
