@@ -6,13 +6,14 @@
 
 namespace {
 
-std::mutex mtx_;
-const char *cLoggerName{"TestLog"};
+std::mutex mtx_;  // Make sure these test are not running in parallel causing
+                  // output mix-up
+static const char *cLoggerName{"TestLog"};
 
 class TestLog : public qle::TestFixture {
  protected:
-  void SetUp() { qle::Logger::set_log_level(qle::Logger::LogLevel::INFO); }
-  void TearDown() { qle::Logger::set_log_level(qle::Logger::LogLevel::INFO); }
+  void SetUp() { qle::Logger::set_log_level(qle::Logger::LogLevel::TRACE); }
+  void TearDown() { qle::Logger::set_log_level(qle::Logger::LogLevel::TRACE); }
 };
 
 TEST_F(TestLog, LogVariousLevels) {
@@ -21,7 +22,6 @@ TEST_F(TestLog, LogVariousLevels) {
   auto logger = std::make_unique<qle::Logger>(cLoggerName);
   const char *msg{"Sample text"};
 
-  qle::Logger::set_log_level(qle::Logger::LogLevel::TRACE);
   {
     auto out =
         capture_output([&](const char *msg) { logger->trace(msg); }, msg);
@@ -92,57 +92,59 @@ TEST_F(TestLog, LogHigherLevel) {
   auto logger = std::make_unique<qle::Logger>(cLoggerName);
   const char *msg{"Sample text"};
 
+  /// If log level is WARNING, only log_warn() & log_error() output to stderr
   {
-    // Expect NO Log info returned
+    // Expect NO log for log_trace, log_debug, log_info
     auto out =
         capture_output([&](const char *msg) { logger->trace(msg); }, msg);
     EXPECT_EQ(out["stdout"], "");
-  }
-  {
-    // Expect NO Log info returned
-    auto out =
-        capture_output([&](const char *msg) { logger->debug(msg); }, msg);
+
+    out = capture_output([&](const char *msg) { logger->debug(msg); }, msg);
     EXPECT_EQ(out["stdout"], "");
-  }
-  {
-    // Expect NO Log info returned
-    auto out = capture_output([&](const char *msg) { logger->info(msg); }, msg);
+
+    out = capture_output([&](const char *msg) { logger->info(msg); }, msg);
     EXPECT_EQ(out["stdout"], "");
+
+    // Expect log_warn and log_error return non-empty
+    out = capture_output([&](const char *msg) { logger->warn(msg); }, msg);
+    char buff_warn[1024]{};
+    snprintf(buff_warn, sizeof(buff_warn), "[%s] %s: %s\n", "warn", cLoggerName,
+             msg);
+    EXPECT_EQ(out["stderr"], buff_warn);
+
+    out = capture_output([&](const char *msg) { logger->error(msg); }, msg);
+    char buff_error[1024]{};
+    snprintf(buff_error, sizeof(buff_error), "[%s] %s: %s\n", "error",
+             cLoggerName, msg);
+    EXPECT_EQ(out["stderr"], buff_error);
   }
 
-  {
-    // Expect Log warn returned
-    auto out = capture_output([&](const char *msg) { logger->warn(msg); }, msg);
-    char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "warn", cLoggerName, msg);
-    EXPECT_EQ(out["stderr"], buff);
-  }
-  {
-    // Expect Log error returned
-    auto out =
-        capture_output([&](const char *msg) { logger->error(msg); }, msg);
-    char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "error", cLoggerName, msg);
-    EXPECT_EQ(out["stderr"], buff);
-  }
-
+  /// If log level is ERROR, only log_error() outputs to stderr
   qle::Logger::set_log_level(qle::Logger::LogLevel::ERROR);
   {
     // Expect NO Log warn returned
     auto out = capture_output([&](const char *msg) { logger->warn(msg); }, msg);
     EXPECT_EQ(out["stderr"], "");
-  }
 
-  {
     // Expect Log error returned
-    auto out =
-        capture_output([&](const char *msg) { logger->error(msg); }, msg);
+    out = capture_output([&](const char *msg) { logger->error(msg); }, msg);
     char buff[1024]{};
     snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "error", cLoggerName, msg);
     EXPECT_EQ(out["stderr"], buff);
   }
 
+  /// If log level is DISABLED, no log to stderr / stdout is active
   qle::Logger::set_log_level(qle::Logger::LogLevel::DISABLED);
+  {
+    // Expect NO Log error returned
+    auto out =
+        capture_output([&](const char *msg) { logger->error(msg); }, msg);
+    EXPECT_EQ(out["stderr"], "");
+  }
+
+  /// If log level is incorrectly set to > DISABLED, no log to stderr / stdout
+  qle::Logger::set_log_level(
+      qle::Logger::LogLevel(qle::Logger::LogLevel::DISABLED + 100));
   {
     // Expect NO Log error returned
     auto out =
@@ -163,7 +165,6 @@ TEST_F(TestLog, LogComplexFormat) {
   const size_t size_var = 1;
   const int int_var = -2;
 
-  qle::Logger::set_log_level(qle::Logger::LogLevel::TRACE);
   {
     auto out = capture_output(
         [&](const char *msg, size_t size_var, int int_var, int *ptr) {
