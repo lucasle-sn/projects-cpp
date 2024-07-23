@@ -145,7 +145,7 @@ class Logger {
    * @param message Log message
    */
   void log(LogLevel level, const char *format, va_list args) noexcept {
-    if ((level < log_level_) || (level == LogLevel::DISABLED)) {
+    if ((level < log_level_) || (level >= LogLevel::DISABLED)) {
       return;
     }
 
