@@ -15,7 +15,14 @@ class Logger {
   /**
    * @brief LogLevel enum
    */
-  enum LogLevel { INFO = 0, DEBUG, WARNING, ERROR, DISABLED };
+  enum LogLevel {
+    TRACE = 0,  ///< Trace
+    DEBUG,      ///< Debug
+    INFO,       ///< Info
+    WARNING,    ///< Warning
+    ERROR,      ///< Error
+    DISABLED    ///< Disabled
+  };
 
   /**
    * @brief Constructor deleted
@@ -45,9 +52,10 @@ class Logger {
   /**
    * @brief Construct a new Logger object
    *
-   * @param loggerName Logger name
+   * @param logger_name Logger name
    */
-  explicit Logger(const char *loggerName) noexcept : loggerName_(loggerName) {}
+  explicit Logger(const char *logger_name) noexcept
+      : logger_name_(logger_name) {}
 
   /**
    * @brief Destroy the Logger object
@@ -65,6 +73,32 @@ class Logger {
   }
 
   /**
+   * @brief Log trace to stdout
+   *
+   * @param format Format
+   * @param ...
+   */
+  void trace(const char *format, ...) noexcept {
+    va_list args;
+    va_start(args, format);
+    log(LogLevel::TRACE, format, args);
+    va_end(args);
+  }
+
+  /**
+   * @brief Log debug to stdout
+   *
+   * @param format Format
+   * @param ...
+   */
+  void debug(const char *format, ...) noexcept {
+    va_list args;
+    va_start(args, format);
+    log(LogLevel::DEBUG, format, args);
+    va_end(args);
+  }
+
+  /**
    * @brief Log info to stdout
    *
    * @param format Format
@@ -74,19 +108,6 @@ class Logger {
     va_list args;
     va_start(args, format);
     log(LogLevel::INFO, format, args);
-    va_end(args);
-  }
-
-  /**
-   * @brief Log debug to stderr
-   *
-   * @param format Format
-   * @param ...
-   */
-  void debug(const char *format, ...) noexcept {
-    va_list args;
-    va_start(args, format);
-    log(LogLevel::DEBUG, format, args);
     va_end(args);
   }
 
@@ -124,22 +145,31 @@ class Logger {
    * @param message Log message
    */
   void log(LogLevel level, const char *format, va_list args) noexcept {
-    if (level < logLevel_) {
+    if ((level < logLevel_) || (level == LogLevel::DISABLED)) {
       return;
     }
 
-    std::lock_guard<std::mutex> guard(mutex_log_);
     char logMessage[1024]{};
     vsnprintf(logMessage, sizeof(logMessage), format, args);
 
     char fullLogMessage[1024]{};
     snprintf(fullLogMessage, sizeof(fullLogMessage), "[%s] %s: %s",
-             logLevelToString(level), loggerName_, logMessage);
+             logLevelToString(level), logger_name_, logMessage);
 
-    if (level == LogLevel::INFO) {
-      fprintf(stdout, "%s\n", fullLogMessage);
-    } else {
-      fprintf(stderr, "%s\n", fullLogMessage);
+    std::lock_guard<std::mutex> guard(mutex_log_);
+    switch (level) {
+      case LogLevel::TRACE:
+      case LogLevel::DEBUG:
+      case LogLevel::INFO:
+        fprintf(stdout, "%s\n", fullLogMessage);
+        break;
+      case LogLevel::WARNING:
+      case LogLevel::ERROR:
+        fprintf(stderr, "%s\n", fullLogMessage);
+        break;
+      case LogLevel::DISABLED:
+      default:
+        return;
     }
   }
 
@@ -151,19 +181,24 @@ class Logger {
    */
   const char *logLevelToString(LogLevel level) const noexcept {
     switch (level) {
-      case LogLevel::INFO:
-        return "info";
+      case LogLevel::TRACE:
+        return "trace";
       case LogLevel::DEBUG:
         return "debug";
+      case LogLevel::INFO:
+        return "info";
       case LogLevel::WARNING:
         return "warn";
       case LogLevel::ERROR:
-      default:
         return "error";
+      case LogLevel::DISABLED:
+        return "disabled";
+      default:
+        return nullptr;
     }
   }
 
-  const char *loggerName_;             ///< Logger name
+  const char *logger_name_;            ///< Logger name
   std::mutex mutex_log_;               ///< Mutex logging
   static std::mutex mutex_log_level_;  ///< Mutex logLevel
   static LogLevel logLevel_;           ///< Log level
