@@ -65,11 +65,11 @@ class Logger {
   /**
    * @brief Set the log level
    *
-   * @param logLevel log level
+   * @param log_level log level
    */
-  static void set_log_level(LogLevel logLevel) {
+  static void set_log_level(LogLevel log_level) {
     std::lock_guard<std::mutex> guard(mutex_log_level_);
-    logLevel_ = logLevel;
+    log_level_ = log_level;
   }
 
   /**
@@ -145,27 +145,27 @@ class Logger {
    * @param message Log message
    */
   void log(LogLevel level, const char *format, va_list args) noexcept {
-    if ((level < logLevel_) || (level == LogLevel::DISABLED)) {
+    if ((level < log_level_) || (level == LogLevel::DISABLED)) {
       return;
     }
 
-    char logMessage[1024]{};
-    vsnprintf(logMessage, sizeof(logMessage), format, args);
+    char log_msg[1024]{};
+    vsnprintf(log_msg, sizeof(log_msg), format, args);
 
-    char fullLogMessage[1024]{};
-    snprintf(fullLogMessage, sizeof(fullLogMessage), "[%s] %s: %s",
-             logLevelToString(level), logger_name_, logMessage);
+    char full_log_msg[1024]{};
+    snprintf(full_log_msg, sizeof(full_log_msg), "[%s] %s: %s",
+             log_level_to_string(level), logger_name_, log_msg);
 
     std::lock_guard<std::mutex> guard(mutex_log_);
     switch (level) {
       case LogLevel::TRACE:
       case LogLevel::DEBUG:
       case LogLevel::INFO:
-        fprintf(stdout, "%s\n", fullLogMessage);
+        fprintf(stdout, "%s\n", full_log_msg);
         break;
       case LogLevel::WARNING:
       case LogLevel::ERROR:
-        fprintf(stderr, "%s\n", fullLogMessage);
+        fprintf(stderr, "%s\n", full_log_msg);
         break;
       case LogLevel::DISABLED:
       default:
@@ -179,7 +179,7 @@ class Logger {
    * @param level Log level
    * @return const char*
    */
-  const char *logLevelToString(LogLevel level) const noexcept {
+  const char *log_level_to_string(LogLevel level) const noexcept {
     switch (level) {
       case LogLevel::TRACE:
         return "trace";
@@ -192,7 +192,6 @@ class Logger {
       case LogLevel::ERROR:
         return "error";
       case LogLevel::DISABLED:
-        return "disabled";
       default:
         return nullptr;
     }
@@ -200,8 +199,8 @@ class Logger {
 
   const char *logger_name_;            ///< Logger name
   std::mutex mutex_log_;               ///< Mutex logging
-  static std::mutex mutex_log_level_;  ///< Mutex logLevel
-  static LogLevel logLevel_;           ///< Log level
+  static std::mutex mutex_log_level_;  ///< Mutex log_level
+  static LogLevel log_level_;          ///< Log level
 };
 
 }  // namespace qle
