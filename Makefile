@@ -28,7 +28,7 @@ do-all-unit-tests:
 	${CMAKE} --build ${BUILD_DIR} -j8 -- --no-print-directory
 	cd ${BUILD_DIR} && ${CTEST} -j8 -T test --no-compress-output
 
-gen-doxygen: all
+gen-doxygen: all-clang
 	${CMAKE} --build ${BUILD_DIR} --target doxygen -- --no-print-directory
 
 do-clang-format-check:

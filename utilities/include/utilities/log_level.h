@@ -3,10 +3,13 @@
 
 namespace qle {
 
+/**
+ * @brief LogLevel class
+ */
 class LogLevel {
  public:
   /**
-   * @brief LogLevel enum
+   * @brief Level enum
    */
   enum Level {
     TRACE = 0,  ///< Trace
@@ -23,7 +26,7 @@ class LogLevel {
    * @param level Log level
    * @return true/false
    */
-  static bool is_valid_log_level(Level level) {
+  static bool is_valid_log_level(Level level) noexcept {
     return ((level >= Level::TRACE) && (level <= Level::DISABLED));
   }
 
