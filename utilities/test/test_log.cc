@@ -6,14 +6,14 @@
 
 namespace {
 
-std::mutex mtx_;  // Make sure these test are not running in parallel causing
-                  // output mix-up
 static const char *cLoggerName{"TestLog"};
 
 class TestLog : public qle::TestFixture {
  protected:
   void SetUp() { qle::Logger::set_log_level(qle::Logger::LogLevel::TRACE); }
   void TearDown() { qle::Logger::set_log_level(qle::Logger::LogLevel::TRACE); }
+
+  std::mutex &mtx_ = qle::TestFixture::mtx_;
 };
 
 TEST_F(TestLog, LogVariousLevels) {
