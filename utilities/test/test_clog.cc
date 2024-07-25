@@ -10,27 +10,25 @@ static const char *cCLoggerName{"TestClog"};
 
 class TestClog : public qle::TestFixture {
  protected:
-  void SetUp() { qle::CLogger::set_log_level(qle::CLogger::LogLevel::TRACE); }
-  void TearDown() {
-    qle::CLogger::set_log_level(qle::CLogger::LogLevel::TRACE);
-  }
+  void SetUp() { qle::CLogger::set_log_level(qle::LogLevel::TRACE); }
+  void TearDown() { qle::CLogger::set_log_level(qle::LogLevel::TRACE); }
 
   std::mutex &mtx_ = qle::TestFixture::mtx_;
 };
 
 TEST_F(TestClog, SetLogLevel) {
-  std::array<int, 4> invalid_levels{-100, -1, qle::CLogger::DISABLED + 1,
-                                    qle::CLogger::DISABLED + 100};
-  std::array<int, 6> valid_levels{qle::CLogger::TRACE, qle::CLogger::DEBUG,
-                                  qle::CLogger::INFO,  qle::CLogger::WARNING,
-                                  qle::CLogger::ERROR, qle::CLogger::DISABLED};
+  std::array<int, 4> invalid_levels{-100, -1, qle::LogLevel::DISABLED + 1,
+                                    qle::LogLevel::DISABLED + 100};
+  std::array<int, 6> valid_levels{
+      qle::LogLevel::TRACE,   qle::LogLevel::DEBUG, qle::LogLevel::INFO,
+      qle::LogLevel::WARNING, qle::LogLevel::ERROR, qle::LogLevel::DISABLED};
 
   for (auto &level : invalid_levels) {
-    ASSERT_FALSE(qle::CLogger::set_log_level(qle::CLogger::LogLevel(level)));
+    ASSERT_FALSE(qle::CLogger::set_log_level(qle::LogLevel::Level(level)));
   }
 
   for (auto &level : valid_levels) {
-    ASSERT_TRUE(qle::CLogger::set_log_level(qle::CLogger::LogLevel(level)));
+    ASSERT_TRUE(qle::CLogger::set_log_level(qle::LogLevel::Level(level)));
   }
 }
 
@@ -106,7 +104,7 @@ TEST_F(TestClog, LogMultipleTimes) {
 TEST_F(TestClog, LogHigherLevel) {
   std::lock_guard<std::mutex> guard(mtx_);
 
-  qle::CLogger::set_log_level(qle::CLogger::LogLevel::WARNING);
+  qle::CLogger::set_log_level(qle::LogLevel::WARNING);
   auto logger = std::make_unique<qle::CLogger>(cCLoggerName);
   const char *msg{"Sample text"};
 
@@ -138,7 +136,7 @@ TEST_F(TestClog, LogHigherLevel) {
   }
 
   /// If log level is ERROR, only log_error() outputs to stderr
-  qle::CLogger::set_log_level(qle::CLogger::LogLevel::ERROR);
+  qle::CLogger::set_log_level(qle::LogLevel::ERROR);
   {
     // Expect NO Log warn returned
     auto out = capture_output([&](const char *msg) { logger->warn(msg); }, msg);
@@ -152,7 +150,7 @@ TEST_F(TestClog, LogHigherLevel) {
   }
 
   /// If log level is DISABLED, no log to stderr / stdout is active
-  qle::CLogger::set_log_level(qle::CLogger::LogLevel::DISABLED);
+  qle::CLogger::set_log_level(qle::LogLevel::DISABLED);
   {
     // Expect NO Log error returned
     auto out =

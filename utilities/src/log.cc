@@ -3,7 +3,7 @@
 namespace qle {
 
 // Set default log level
-Logger::LogLevel Logger::log_level_ = Logger::LogLevel::INFO;
+LogLevel::Level Logger::log_level_ = LogLevel::INFO;
 std::mutex Logger::mutex_log_level_;
 
 }  // namespace qle

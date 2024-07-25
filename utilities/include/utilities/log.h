@@ -5,6 +5,8 @@
 #include <cstdio>
 #include <mutex>
 
+#include <utilities/log_level.h>
+
 namespace qle {
 
 /**
@@ -12,18 +14,6 @@ namespace qle {
  */
 class Logger {
  public:
-  /**
-   * @brief LogLevel enum
-   */
-  enum LogLevel {
-    TRACE = 0,  ///< Trace
-    DEBUG,      ///< Debug
-    INFO,       ///< Info
-    WARNING,    ///< Warning
-    ERROR,      ///< Error
-    DISABLED    ///< Disabled
-  };
-
   /**
    * @brief Constructor deleted
    */
@@ -68,8 +58,8 @@ class Logger {
    * @param log_level log level
    * @return true/false
    */
-  static bool set_log_level(LogLevel log_level) {
-    if (!is_valid_log_level(log_level)) {
+  static bool set_log_level(LogLevel::Level log_level) {
+    if (!LogLevel::is_valid_log_level(log_level)) {
       return false;
     }
     std::lock_guard<std::mutex> guard(mutex_log_level_);
@@ -149,8 +139,8 @@ class Logger {
    * @param level Log level
    * @param message Log message
    */
-  void log(LogLevel level, const char *format, va_list args) noexcept {
-    if (!is_valid_log_level(level)) {
+  void log(LogLevel::Level level, const char *format, va_list args) noexcept {
+    if (!LogLevel::is_valid_log_level(level)) {
       return;
     }
 
@@ -163,7 +153,7 @@ class Logger {
 
     char full_log_msg[1024]{};
     snprintf(full_log_msg, sizeof(full_log_msg), "[%s] %s: %s",
-             log_level_to_string(level), logger_name_, log_msg);
+             LogLevel::log_level_to_string(level), logger_name_, log_msg);
 
     std::lock_guard<std::mutex> guard(mutex_log_);
     switch (level) {
@@ -175,47 +165,17 @@ class Logger {
       case LogLevel::WARNING:
       case LogLevel::ERROR:
         fprintf(stderr, "%s\n", full_log_msg);
-    }
-  }
-
-  /**
-   * @brief Check if log level is valid
-   *
-   * @param level Log level
-   * @return true/false
-   */
-  static bool is_valid_log_level(LogLevel level) {
-    return ((level >= LogLevel::TRACE) && (level <= LogLevel::DISABLED));
-  }
-
-  /**
-   * @brief Convert log level to string
-   *
-   * @param level Log level
-   * @return const char*
-   */
-  const char *log_level_to_string(LogLevel level) const noexcept {
-    switch (level) {
-      case LogLevel::TRACE:
-        return "trace";
-      case LogLevel::DEBUG:
-        return "debug";
-      case LogLevel::INFO:
-        return "info";
-      case LogLevel::WARNING:
-        return "warn";
-      case LogLevel::ERROR:
-        return "error";
+        break;
       case LogLevel::DISABLED:
       default:
-        return nullptr;
+        return;
     }
   }
 
   const char *logger_name_;            ///< Logger name
   std::mutex mutex_log_;               ///< Mutex logging
   static std::mutex mutex_log_level_;  ///< Mutex log_level
-  static LogLevel log_level_;          ///< Log level
+  static LogLevel::Level log_level_;   ///< Log level
 };
 
 }  // namespace qle
