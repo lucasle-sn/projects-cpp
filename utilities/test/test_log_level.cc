@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <array>
 
 #include <utilities/log_level.h>
 
