@@ -175,10 +175,6 @@ class Logger {
       case LogLevel::WARNING:
       case LogLevel::ERROR:
         fprintf(stderr, "%s\n", full_log_msg);
-        break;
-      case LogLevel::DISABLED:
-      default:
-        return;
     }
   }
 
