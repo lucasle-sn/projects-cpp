@@ -72,7 +72,7 @@ class CLogger {
    * @return true/false
    */
   static bool set_log_level(LogLevel log_level) {
-    if ((log_level < LogLevel::TRACE) || (log_level > LogLevel::DISABLED)) {
+    if (!is_valid_log_level(log_level)) {
       return false;
     }
     std::lock_guard<std::mutex> guard(mutex_log_level_);
@@ -145,7 +145,11 @@ class CLogger {
    */
   template <typename... Args>
   void log(LogLevel level, const char *format, Args... args) noexcept {
-    if ((level < log_level_) || (level >= LogLevel::DISABLED)) {
+    if (!is_valid_log_level(level)) {
+      return;
+    }
+
+    if (level < log_level_) {
       return;
     }
 
@@ -168,6 +172,16 @@ class CLogger {
       default:
         return;
     }
+  }
+
+  /**
+   * @brief Check if log level is valid
+   *
+   * @param level Log level
+   * @return true/false
+   */
+  static bool is_valid_log_level(LogLevel level) {
+    return ((level >= LogLevel::TRACE) && (level <= LogLevel::DISABLED));
   }
 
   /**

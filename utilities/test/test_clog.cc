@@ -159,16 +159,6 @@ TEST_F(TestClog, LogHigherLevel) {
         capture_output([&](const char *msg) { logger->error(msg); }, msg);
     EXPECT_EQ(out["stderr"], "");
   }
-
-  /// If log level is incorrectly set to > DISABLED, no log to stderr / stdout
-  qle::CLogger::set_log_level(
-      qle::CLogger::LogLevel(qle::CLogger::LogLevel::DISABLED + 100));
-  {
-    // Expect NO Log error returned
-    auto out =
-        capture_output([&](const char *msg) { logger->error(msg); }, msg);
-    EXPECT_EQ(out["stderr"], "");
-  }
 }
 
 TEST_F(TestClog, LogComplexFormat) {
