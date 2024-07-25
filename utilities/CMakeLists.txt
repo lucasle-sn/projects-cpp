@@ -1,6 +1,7 @@
 add_library(utilities
   src/bytestream.cc
   src/log.cc
+  src/test_fixture.cc
   src/thread.cc
 )
 
@@ -9,7 +10,8 @@ target_include_directories(utilities
 )
 
 target_link_libraries(utilities
-  public-types Threads::Threads
+  PUBLIC public-types Threads::Threads fmt::fmt
+  PRIVATE gtest gtest_main
 )
 
 add_executable(unit-test-utilities
