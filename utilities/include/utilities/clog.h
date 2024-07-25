@@ -1,8 +1,11 @@
-#ifndef UTILITIES_LOG_H
-#define UTILITIES_LOG_H
+#ifndef UTILITIES_CLOG_H
+#define UTILITIES_CLOG_H
 
+#include <fmt/core.h>
+#include <fmt/format.h>
 #include <cstdarg>
 #include <cstdio>
+#include <iostream>
 #include <mutex>
 
 #include <utilities/log_level.h>
@@ -10,47 +13,47 @@
 namespace qle {
 
 /**
- * @brief Logger class
+ * @brief CLogger class
  */
-class Logger {
+class CLogger {
  public:
   /**
    * @brief Constructor deleted
    */
-  Logger() = delete;
+  CLogger() = delete;
 
   /**
    * @brief Copy constructor deleted
    */
-  Logger(const Logger &) = delete;
+  CLogger(const CLogger &) = delete;
 
   /**
    * @brief Move constructor deleted
    */
-  Logger(Logger &&) = delete;
+  CLogger(CLogger &&) = delete;
 
   /**
    * @brief Copy assignment deleted
    */
-  Logger &operator=(const Logger &) = delete;
+  CLogger &operator=(const CLogger &) = delete;
 
   /**
    * @brief Move assignment deleted
    */
-  Logger &operator=(Logger &&) = delete;
+  CLogger &operator=(CLogger &&) = delete;
 
   /**
-   * @brief Construct a new Logger object
+   * @brief Construct a new CLogger object
    *
-   * @param logger_name Logger name
+   * @param logger_name CLogger name
    */
-  explicit Logger(const char *logger_name) noexcept
+  explicit CLogger(const char *logger_name) noexcept
       : logger_name_(logger_name) {}
 
   /**
-   * @brief Destroy the Logger object
+   * @brief Destroy the CLogger object
    */
-  ~Logger() = default;
+  ~CLogger() = default;
 
   /**
    * @brief Set the log level
@@ -71,65 +74,55 @@ class Logger {
    * @brief Log trace to stdout
    *
    * @param format Format
-   * @param ...
+   * @param args Follow-up arguments
    */
-  void trace(const char *format, ...) noexcept {
-    va_list args;
-    va_start(args, format);
-    log(LogLevel::TRACE, format, args);
-    va_end(args);
+  template <typename... Args>
+  void trace(const char *format, Args... args) noexcept {
+    log(LogLevel::TRACE, format, args...);
   }
 
   /**
    * @brief Log debug to stdout
    *
    * @param format Format
-   * @param ...
+   * @param args Follow-up arguments
    */
-  void debug(const char *format, ...) noexcept {
-    va_list args;
-    va_start(args, format);
-    log(LogLevel::DEBUG, format, args);
-    va_end(args);
+  template <typename... Args>
+  void debug(const char *format, Args... args) noexcept {
+    log(LogLevel::DEBUG, format, args...);
   }
 
   /**
    * @brief Log info to stdout
    *
    * @param format Format
-   * @param ...
+   * @param args Follow-up arguments
    */
-  void info(const char *format, ...) noexcept {
-    va_list args;
-    va_start(args, format);
-    log(LogLevel::INFO, format, args);
-    va_end(args);
+  template <typename... Args>
+  void info(const char *format, Args... args) noexcept {
+    log(LogLevel::INFO, format, args...);
   }
 
   /**
    * @brief Log warning to stderr
    *
    * @param format Format
-   * @param ...
+   * @param args Follow-up arguments
    */
-  void warn(const char *format, ...) noexcept {
-    va_list args;
-    va_start(args, format);
-    log(LogLevel::WARNING, format, args);
-    va_end(args);
+  template <typename... Args>
+  void warn(const char *format, Args... args) noexcept {
+    log(LogLevel::WARNING, format, args...);
   }
 
   /**
    * @brief Log error to stderr
    *
    * @param format Format
-   * @param ...
+   * @param args Follow-up arguments
    */
-  void error(const char *format, ...) noexcept {
-    va_list args;
-    va_start(args, format);
-    log(LogLevel::ERROR, format, args);
-    va_end(args);
+  template <typename... Args>
+  void error(const char *format, Args... args) noexcept {
+    log(LogLevel::ERROR, format, args...);
   }
 
  private:
@@ -137,9 +130,11 @@ class Logger {
    * @brief Log data
    *
    * @param level Log level
-   * @param message Log message
+   * @param format Format
+   * @param args Follow-up arguments
    */
-  void log(LogLevel::Level level, const char *format, va_list args) noexcept {
+  template <typename... Args>
+  void log(LogLevel::Level level, const char *format, Args... args) noexcept {
     if (!LogLevel::is_valid_log_level(level)) {
       return;
     }
@@ -148,23 +143,20 @@ class Logger {
       return;
     }
 
-    char log_msg[1024]{};
-    vsnprintf(log_msg, sizeof(log_msg), format, args);
-
-    char full_log_msg[1024]{};
-    snprintf(full_log_msg, sizeof(full_log_msg), "[%s] %s: %s",
-             LogLevel::log_level_to_string(level), logger_name_, log_msg);
+    std::string full_log_msg =
+        fmt::format("[{}] {}: {}", LogLevel::log_level_to_string(level),
+                    logger_name_, fmt::format(format, args...));
 
     std::lock_guard<std::mutex> guard(mutex_log_);
     switch (level) {
       case LogLevel::TRACE:
       case LogLevel::DEBUG:
       case LogLevel::INFO:
-        fprintf(stdout, "%s\n", full_log_msg);
+        std::cout << full_log_msg << std::endl;
         break;
       case LogLevel::WARNING:
       case LogLevel::ERROR:
-        fprintf(stderr, "%s\n", full_log_msg);
+        std::cerr << full_log_msg << std::endl;
         break;
       case LogLevel::DISABLED:
       default:
@@ -180,4 +172,4 @@ class Logger {
 
 }  // namespace qle
 
-#endif  // UTILITIES_LOG_H
+#endif  // UTILITIES_CLOG_H

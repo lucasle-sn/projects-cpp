@@ -37,6 +37,9 @@ class TestFixture : public ::testing::Test {
     output["stderr"] = testing::internal::GetCapturedStderr();
     return output;
   }
+
+ protected:
+  static std::mutex mtx_;  ///< mutex to prevent tests running in parallel
 };
 
 }  // namespace qle
