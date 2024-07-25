@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <array>
 #include <memory>
 
 #include <utilities/clog.h>
