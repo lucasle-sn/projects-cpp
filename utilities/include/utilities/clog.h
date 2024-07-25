@@ -3,7 +3,6 @@
 
 #include <fmt/core.h>
 #include <fmt/format.h>
-#include <array>
 #include <cstdarg>
 #include <cstdio>
 #include <iostream>
