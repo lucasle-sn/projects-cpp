@@ -9,7 +9,7 @@ on:
       - '*'
 
 env:
-  BUILD_DEPENDENCIES: cmake build-essential checkinstall zlib1g-dev libssl-dev
+  BUILD_DEPENDENCIES: cmake build-essential checkinstall zlib1g-dev libssl-dev libfmt-dev
   BUILD_DIRECTORY: build
 
 jobs:
