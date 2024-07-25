@@ -66,10 +66,15 @@ class Logger {
    * @brief Set the log level
    *
    * @param log_level log level
+   * @return true/false
    */
-  static void set_log_level(LogLevel log_level) {
+  static bool set_log_level(LogLevel log_level) {
+    if ((log_level < LogLevel::TRACE) || (log_level > LogLevel::DISABLED)) {
+      return false;
+    }
     std::lock_guard<std::mutex> guard(mutex_log_level_);
     log_level_ = log_level;
+    return true;
   }
 
   /**

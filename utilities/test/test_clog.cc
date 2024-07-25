@@ -6,53 +6,71 @@
 
 namespace {
 
-static const char *cLoggerName{"TestClog"};
+static const char *cCLoggerName{"TestClog"};
 
 class TestClog : public qle::TestFixture {
  protected:
-  void SetUp() { qle::Logger::set_log_level(qle::Logger::LogLevel::TRACE); }
-  void TearDown() { qle::Logger::set_log_level(qle::Logger::LogLevel::TRACE); }
+  void SetUp() { qle::CLogger::set_log_level(qle::CLogger::LogLevel::TRACE); }
+  void TearDown() {
+    qle::CLogger::set_log_level(qle::CLogger::LogLevel::TRACE);
+  }
 
   std::mutex &mtx_ = qle::TestFixture::mtx_;
 };
 
+TEST_F(TestClog, SetLogLevel) {
+  std::array<int, 4> invalid_levels{-100, -1, qle::CLogger::DISABLED + 1,
+                                    qle::CLogger::DISABLED + 100};
+  std::array<int, 6> valid_levels{qle::CLogger::TRACE, qle::CLogger::DEBUG,
+                                  qle::CLogger::INFO,  qle::CLogger::WARNING,
+                                  qle::CLogger::ERROR, qle::CLogger::DISABLED};
+
+  for (auto &level : invalid_levels) {
+    ASSERT_FALSE(qle::CLogger::set_log_level(qle::CLogger::LogLevel(level)));
+  }
+
+  for (auto &level : valid_levels) {
+    ASSERT_TRUE(qle::CLogger::set_log_level(qle::CLogger::LogLevel(level)));
+  }
+}
+
 TEST_F(TestClog, LogVariousLevels) {
   std::lock_guard<std::mutex> guard(mtx_);
 
-  auto logger = std::make_unique<qle::Logger>(cLoggerName);
+  auto logger = std::make_unique<qle::CLogger>(cCLoggerName);
   const char *msg{"Sample text"};
 
   {
     auto out =
         capture_output([&](const char *msg) { logger->trace(msg); }, msg);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "trace", cLoggerName, msg);
+    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "trace", cCLoggerName, msg);
     EXPECT_EQ(out["stdout"], buff);
   }
   {
     auto out =
         capture_output([&](const char *msg) { logger->debug(msg); }, msg);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "debug", cLoggerName, msg);
+    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "debug", cCLoggerName, msg);
     EXPECT_EQ(out["stdout"], buff);
   }
   {
     auto out = capture_output([&](const char *msg) { logger->info(msg); }, msg);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "info", cLoggerName, msg);
+    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "info", cCLoggerName, msg);
     EXPECT_EQ(out["stdout"], buff);
   }
   {
     auto out = capture_output([&](const char *msg) { logger->warn(msg); }, msg);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "warn", cLoggerName, msg);
+    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "warn", cCLoggerName, msg);
     EXPECT_EQ(out["stderr"], buff);
   }
   {
     auto out =
         capture_output([&](const char *msg) { logger->error(msg); }, msg);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "error", cLoggerName, msg);
+    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "error", cCLoggerName, msg);
     EXPECT_EQ(out["stderr"], buff);
   }
 }
@@ -60,7 +78,7 @@ TEST_F(TestClog, LogVariousLevels) {
 TEST_F(TestClog, LogMultipleTimes) {
   std::lock_guard<std::mutex> guard(mtx_);
 
-  auto logger = std::make_unique<qle::Logger>(cLoggerName);
+  auto logger = std::make_unique<qle::CLogger>(cCLoggerName);
   const char *msg{"Sample text"};
 
   for (size_t i = 0; i < 10; i++) {
@@ -71,7 +89,7 @@ TEST_F(TestClog, LogMultipleTimes) {
     auto out = capture_output([&](const char *msg) { logger->info(msg); },
                               modified_msg);
     char buff_out[1024]{};
-    snprintf(buff_out, sizeof(buff_out), "[%s] %s: %s\n", "info", cLoggerName,
+    snprintf(buff_out, sizeof(buff_out), "[%s] %s: %s\n", "info", cCLoggerName,
              modified_msg);
     EXPECT_EQ(out["stdout"], buff_out);
 
@@ -79,7 +97,7 @@ TEST_F(TestClog, LogMultipleTimes) {
     out = capture_output([&](const char *msg) { logger->error(msg); },
                          modified_msg);
     char buff_err[1024]{};
-    snprintf(buff_err, sizeof(buff_err), "[%s] %s: %s\n", "error", cLoggerName,
+    snprintf(buff_err, sizeof(buff_err), "[%s] %s: %s\n", "error", cCLoggerName,
              modified_msg);
     EXPECT_EQ(out["stderr"], buff_err);
   }
@@ -88,8 +106,8 @@ TEST_F(TestClog, LogMultipleTimes) {
 TEST_F(TestClog, LogHigherLevel) {
   std::lock_guard<std::mutex> guard(mtx_);
 
-  qle::Logger::set_log_level(qle::Logger::LogLevel::WARNING);
-  auto logger = std::make_unique<qle::Logger>(cLoggerName);
+  qle::CLogger::set_log_level(qle::CLogger::LogLevel::WARNING);
+  auto logger = std::make_unique<qle::CLogger>(cCLoggerName);
   const char *msg{"Sample text"};
 
   /// If log level is WARNING, only log_warn() & log_error() output to stderr
@@ -108,19 +126,19 @@ TEST_F(TestClog, LogHigherLevel) {
     // Expect log_warn and log_error return non-empty
     out = capture_output([&](const char *msg) { logger->warn(msg); }, msg);
     char buff_warn[1024]{};
-    snprintf(buff_warn, sizeof(buff_warn), "[%s] %s: %s\n", "warn", cLoggerName,
-             msg);
+    snprintf(buff_warn, sizeof(buff_warn), "[%s] %s: %s\n", "warn",
+             cCLoggerName, msg);
     EXPECT_EQ(out["stderr"], buff_warn);
 
     out = capture_output([&](const char *msg) { logger->error(msg); }, msg);
     char buff_error[1024]{};
     snprintf(buff_error, sizeof(buff_error), "[%s] %s: %s\n", "error",
-             cLoggerName, msg);
+             cCLoggerName, msg);
     EXPECT_EQ(out["stderr"], buff_error);
   }
 
   /// If log level is ERROR, only log_error() outputs to stderr
-  qle::Logger::set_log_level(qle::Logger::LogLevel::ERROR);
+  qle::CLogger::set_log_level(qle::CLogger::LogLevel::ERROR);
   {
     // Expect NO Log warn returned
     auto out = capture_output([&](const char *msg) { logger->warn(msg); }, msg);
@@ -129,12 +147,12 @@ TEST_F(TestClog, LogHigherLevel) {
     // Expect Log error returned
     out = capture_output([&](const char *msg) { logger->error(msg); }, msg);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "error", cLoggerName, msg);
+    snprintf(buff, sizeof(buff), "[%s] %s: %s\n", "error", cCLoggerName, msg);
     EXPECT_EQ(out["stderr"], buff);
   }
 
   /// If log level is DISABLED, no log to stderr / stdout is active
-  qle::Logger::set_log_level(qle::Logger::LogLevel::DISABLED);
+  qle::CLogger::set_log_level(qle::CLogger::LogLevel::DISABLED);
   {
     // Expect NO Log error returned
     auto out =
@@ -143,8 +161,8 @@ TEST_F(TestClog, LogHigherLevel) {
   }
 
   /// If log level is incorrectly set to > DISABLED, no log to stderr / stdout
-  qle::Logger::set_log_level(
-      qle::Logger::LogLevel(qle::Logger::LogLevel::DISABLED + 100));
+  qle::CLogger::set_log_level(
+      qle::CLogger::LogLevel(qle::CLogger::LogLevel::DISABLED + 100));
   {
     // Expect NO Log error returned
     auto out =
@@ -156,7 +174,7 @@ TEST_F(TestClog, LogHigherLevel) {
 TEST_F(TestClog, LogComplexFormat) {
   std::lock_guard<std::mutex> guard(mtx_);
 
-  auto logger = std::make_unique<qle::Logger>(cLoggerName);
+  auto logger = std::make_unique<qle::CLogger>(cCLoggerName);
   int tmp = 0;
   const char *format{"{} {} {} {}"};
   const char *expected_format{"[%s] %s: %s %zu %d %p\n"};
@@ -172,7 +190,7 @@ TEST_F(TestClog, LogComplexFormat) {
         },
         msg, size_var, int_var, &tmp);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), expected_format, "trace", cLoggerName, msg,
+    snprintf(buff, sizeof(buff), expected_format, "trace", cCLoggerName, msg,
              size_var, int_var, &tmp);
     EXPECT_EQ(out["stdout"], buff);
   }
@@ -184,7 +202,7 @@ TEST_F(TestClog, LogComplexFormat) {
         },
         msg, size_var, int_var, &tmp);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), expected_format, "debug", cLoggerName, msg,
+    snprintf(buff, sizeof(buff), expected_format, "debug", cCLoggerName, msg,
              size_var, int_var, &tmp);
     EXPECT_EQ(out["stdout"], buff);
   }
@@ -196,7 +214,7 @@ TEST_F(TestClog, LogComplexFormat) {
         },
         msg, size_var, int_var, &tmp);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), expected_format, "info", cLoggerName, msg,
+    snprintf(buff, sizeof(buff), expected_format, "info", cCLoggerName, msg,
              size_var, int_var, &tmp);
     EXPECT_EQ(out["stdout"], buff);
   }
@@ -208,7 +226,7 @@ TEST_F(TestClog, LogComplexFormat) {
         },
         msg, size_var, int_var, &tmp);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), expected_format, "warn", cLoggerName, msg,
+    snprintf(buff, sizeof(buff), expected_format, "warn", cCLoggerName, msg,
              size_var, int_var, &tmp);
     EXPECT_EQ(out["stderr"], buff);
   }
@@ -220,7 +238,7 @@ TEST_F(TestClog, LogComplexFormat) {
         },
         msg, size_var, int_var, &tmp);
     char buff[1024]{};
-    snprintf(buff, sizeof(buff), expected_format, "error", cLoggerName, msg,
+    snprintf(buff, sizeof(buff), expected_format, "error", cCLoggerName, msg,
              size_var, int_var, &tmp);
     EXPECT_EQ(out["stderr"], buff);
   }

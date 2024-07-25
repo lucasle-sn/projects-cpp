@@ -11,9 +11,9 @@
 namespace qle {
 
 /**
- * @brief Logger class
+ * @brief CLogger class
  */
-class Logger {
+class CLogger {
  public:
   /**
    * @brief LogLevel enum
@@ -30,49 +30,54 @@ class Logger {
   /**
    * @brief Constructor deleted
    */
-  Logger() = delete;
+  CLogger() = delete;
 
   /**
    * @brief Copy constructor deleted
    */
-  Logger(const Logger &) = delete;
+  CLogger(const CLogger &) = delete;
 
   /**
    * @brief Move constructor deleted
    */
-  Logger(Logger &&) = delete;
+  CLogger(CLogger &&) = delete;
 
   /**
    * @brief Copy assignment deleted
    */
-  Logger &operator=(const Logger &) = delete;
+  CLogger &operator=(const CLogger &) = delete;
 
   /**
    * @brief Move assignment deleted
    */
-  Logger &operator=(Logger &&) = delete;
+  CLogger &operator=(CLogger &&) = delete;
 
   /**
-   * @brief Construct a new Logger object
+   * @brief Construct a new CLogger object
    *
-   * @param logger_name Logger name
+   * @param logger_name CLogger name
    */
-  explicit Logger(const char *logger_name) noexcept
+  explicit CLogger(const char *logger_name) noexcept
       : logger_name_(logger_name) {}
 
   /**
-   * @brief Destroy the Logger object
+   * @brief Destroy the CLogger object
    */
-  ~Logger() = default;
+  ~CLogger() = default;
 
   /**
    * @brief Set the log level
    *
    * @param log_level log level
+   * @return true/false
    */
-  static void set_log_level(LogLevel log_level) {
+  static bool set_log_level(LogLevel log_level) {
+    if ((log_level < LogLevel::TRACE) || (log_level > LogLevel::DISABLED)) {
+      return false;
+    }
     std::lock_guard<std::mutex> guard(mutex_log_level_);
     log_level_ = log_level;
+    return true;
   }
 
   /**
@@ -144,9 +149,9 @@ class Logger {
       return;
     }
 
-    std::string log_msg = fmt::format(format, args...);
-    std::string full_log_msg = fmt::format(
-        "[{}] {}: {}", log_level_to_string(level), logger_name_, log_msg);
+    std::string full_log_msg =
+        fmt::format("[{}] {}: {}", log_level_to_string(level), logger_name_,
+                    fmt::format(format, args...));
 
     std::lock_guard<std::mutex> guard(mutex_log_);
     switch (level) {
