@@ -5,8 +5,8 @@ target_include_directories(public-types
 )
 
 add_executable(unit-test-public-types
-  test/test_span.cc
   test/test_error_codes.cc
+  test/test_span.cc
 )
 
 target_link_libraries(unit-test-public-types
