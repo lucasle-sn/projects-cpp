@@ -24,6 +24,8 @@ all-clang:
 			-DCMAKE_CXX_COMPILER="clang++" \
 			&& ${CMAKE} --build ${BUILD_DIR} -j8 -- --no-print-directory
 
+all: all-gcc
+
 do-all-unit-tests:
 	${CMAKE} --build ${BUILD_DIR} -j8 -- --no-print-directory
 	cd ${BUILD_DIR} && ${CTEST} -j8 -T test --no-compress-output
