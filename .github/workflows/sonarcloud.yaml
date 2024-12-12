@@ -52,9 +52,9 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=lucasle-sn_projects-cpp \
+            -Dsonar.projectKey=lucasle-sn_libcore \
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
-            -Dsonar.projectName=projects-cpp \
+            -Dsonar.projectName=libcore \
             -Dsonar.projectVersion=1.0 \
             -Dsonar.sourceEncoding=UTF-8 \
             -Dsonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json" \
