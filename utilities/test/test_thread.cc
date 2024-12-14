@@ -1,3 +1,4 @@
+#include <utilities/test_fixture.h>
 #include <utilities/thread.h>
 
 #include <gtest/gtest.h>
@@ -7,7 +8,7 @@ using BaseThread = qle::Thread;
 
 namespace {
 
-class TestThread : public ::testing::Test {};
+class TestThread : public qle::TestFixture {};
 
 /// Class Counter as shared resource
 class Counter {
@@ -121,7 +122,7 @@ TEST_F(TestThread, Usage) {
           : BaseThread("This Thread has a really long long name") {}
 
      protected:
-      void run() override{};
+      void run() override {};
     };
 
     // Should have return error log for lengthy name
