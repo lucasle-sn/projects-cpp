@@ -5,10 +5,9 @@
 #include <fmt/format.h>
 #include <cstdarg>
 #include <cstdio>
-#include <iostream>
 #include <mutex>
 
-#include <utilities/log_level.h>
+#include <utilities/log_config.h>
 
 namespace qle {
 
@@ -48,27 +47,14 @@ class CLogger {
    * @param logger_name CLogger name
    */
   explicit CLogger(const char *logger_name) noexcept
-      : logger_name_(logger_name) {}
+      : logger_name_(logger_name) {
+    logger_config_ = LoggerConfig::create();
+  }
 
   /**
    * @brief Destroy the CLogger object
    */
   ~CLogger() = default;
-
-  /**
-   * @brief Set the log level
-   *
-   * @param log_level log level
-   * @return true/false
-   */
-  static bool set_log_level(LogLevel::Level log_level) {
-    if (!LogLevel::is_valid_log_level(log_level)) {
-      return false;
-    }
-    std::lock_guard<std::mutex> guard(mutex_log_level_);
-    log_level_ = log_level;
-    return true;
-  }
 
   /**
    * @brief Log trace to stdout
@@ -139,7 +125,7 @@ class CLogger {
       return;
     }
 
-    if (level < log_level_) {
+    if (level < logger_config_->loglevel()) {
       return;
     }
 
@@ -147,7 +133,13 @@ class CLogger {
         fmt::format("[{}] {}: {}", LogLevel::log_level_to_string(level),
                     logger_name_, fmt::format(format, args...));
 
-    std::lock_guard<std::mutex> guard(mutex_log_);
+    std::lock_guard<std::mutex> guard(logger_config_->logmutex);
+    if (logger_config_->logfile()) {
+      if (level != LogLevel::DISABLED) {
+        fprintf(logger_config_->logfile(), "%s\n", full_log_msg.c_str());
+      }
+      return;
+    }
     switch (level) {
       case LogLevel::TRACE:
       case LogLevel::DEBUG:
@@ -164,10 +156,8 @@ class CLogger {
     }
   }
 
-  const char *logger_name_;            ///< Logger name
-  std::mutex mutex_log_;               ///< Mutex logging
-  static std::mutex mutex_log_level_;  ///< Mutex log_level
-  static LogLevel::Level log_level_;   ///< Log level
+  const char *logger_name_;               ///< Logger name
+  LoggerConfig *logger_config_{nullptr};  ///< Logger config
 };
 
 }  // namespace qle
