@@ -1,8 +1,8 @@
-#include <utilities/test_fixture.h>
-#include <utilities/thread.h>
-
 #include <gtest/gtest.h>
 #include <array>
+
+#include <utilities/test_fixture.h>
+#include <utilities/thread.h>
 
 using BaseThread = qle::Thread;
 
@@ -122,7 +122,7 @@ TEST_F(TestThread, Usage) {
           : BaseThread("This Thread has a really long long name") {}
 
      protected:
-      void run() override {};
+      void run() override {}
     };
 
     // Should have return error log for lengthy name
