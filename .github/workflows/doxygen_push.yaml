@@ -1,20 +1,15 @@
-name: Doxygen Check
+name: Doxygen Generate and Upload
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - '*'
+  workflow_dispatch:
 
 env:
   BUILD_DEPENDENCIES: cmake build-essential checkinstall zlib1g-dev libssl-dev libfmt-dev
   BUILD_DIRECTORY: build
 
 jobs:
-  doxygen-check:
-    name: Doxygen Check
+  doxygen-deploy:
+    name: Doxygen Deployment
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -37,3 +32,10 @@ jobs:
           cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Debug -DDOXYGEN_BUILD_ENABLED=ON
           cmake --build ${{ env.BUILD_DIRECTORY }} --target doxygen -- --no-print-directory
           doxygen ${{ env.BUILD_DIRECTORY }}/doxygen/Doxyfile
+
+      - name: Upload Doxygen Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doxygen-docs
+          path: ${{ env.BUILD_DIRECTORY }}/doxygen/docs/html
+          if-no-files-found: error
