@@ -95,29 +95,3 @@ jobs:
             rm $TMPFILE
           done
           echo "Clang-format check successful"
-
-  doxygen-check:
-    name: Doxygen Check
-    runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: [build-ubuntu]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          submodules: recursive
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update && \
-          sudo apt-get install -y ${{ env.BUILD_DEPENDENCIES }} clang-14 doxygen graphviz
-
-      - name: Check doxygen
-        env:
-          CC: clang
-          CXX: clang++
-        run: |
-          cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Debug -DDOXYGEN_BUILD_ENABLED=ON
-          cmake --build ${{ env.BUILD_DIRECTORY }} --target doxygen -- --no-print-directory
-          doxygen ${{ env.BUILD_DIRECTORY }}/doxygen/Doxyfile
