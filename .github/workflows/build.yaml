@@ -121,3 +121,9 @@ jobs:
           cmake -S . -B ${{ env.BUILD_DIRECTORY }} -DCMAKE_BUILD_TYPE=Debug -DDOXYGEN_BUILD_ENABLED=ON
           cmake --build ${{ env.BUILD_DIRECTORY }} --target doxygen -- --no-print-directory
           doxygen ${{ env.BUILD_DIRECTORY }}/doxygen/Doxyfile
+
+      - name: Upload Doxygen Documentation Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: doxygen-docs
+          path: ${{ env.BUILD_DIRECTORY }}/doxygen/docs/html
