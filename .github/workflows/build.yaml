@@ -122,8 +122,9 @@ jobs:
           cmake --build ${{ env.BUILD_DIRECTORY }} --target doxygen -- --no-print-directory
           doxygen ${{ env.BUILD_DIRECTORY }}/doxygen/Doxyfile
 
-      - name: Upload Doxygen Documentation Artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload Doxygen Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: doxygen-docs
           path: ${{ env.BUILD_DIRECTORY }}/doxygen/docs/html
+          if-no-files-found: error
