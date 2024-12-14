@@ -17,7 +17,6 @@ jobs:
     name: Doxygen Check
     runs-on: ubuntu-22.04
     timeout-minutes: 30
-    needs: [build-ubuntu]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
