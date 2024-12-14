@@ -6,6 +6,8 @@
 #include <cstring>
 #include <map>
 
+#include <utilities/log_config.h>
+
 namespace qle {
 
 /**
@@ -39,7 +41,15 @@ class TestFixture : public ::testing::Test {
   }
 
  protected:
+  virtual void SetUp() {
+    logger_cfg_handler_ =
+        std::make_unique<qle::LoggerConfigHandler>(qle::LogLevel::DEBUG);
+  }
+
   static std::mutex mtx_;  ///< mutex to prevent tests running in parallel
+
+ private:
+  std::unique_ptr<qle::LoggerConfigHandler> logger_cfg_handler_{nullptr};
 };
 
 }  // namespace qle
