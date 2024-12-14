@@ -41,6 +41,9 @@ class TestFixture : public ::testing::Test {
   }
 
  protected:
+  /**
+   * @brief Test fixture setup
+   */
   virtual void SetUp() {
     logger_cfg_handler_ =
         std::make_unique<qle::LoggerConfigHandler>(qle::LogLevel::DEBUG);
@@ -49,7 +52,8 @@ class TestFixture : public ::testing::Test {
   static std::mutex mtx_;  ///< mutex to prevent tests running in parallel
 
  private:
-  std::unique_ptr<qle::LoggerConfigHandler> logger_cfg_handler_{nullptr};
+  std::unique_ptr<qle::LoggerConfigHandler> logger_cfg_handler_{
+      nullptr};  ///< Logger config handler ptr
 };
 
 }  // namespace qle

@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include <array>
-#include <condition_variable>
 #include <memory>
 
 #include <utilities/clog.h>

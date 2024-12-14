@@ -2,7 +2,7 @@
 
 namespace qle {
 
-LoggerConfig * LoggerConfig::instance_{nullptr};
+LoggerConfig *LoggerConfig::instance_{nullptr};
 std::mutex LoggerConfig::instance_mtx_;
 
 }  // namespace qle

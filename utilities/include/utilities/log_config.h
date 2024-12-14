@@ -198,6 +198,8 @@ class LoggerConfigHandler {
 
   /**
    * @brief Get logger config  ptr
+   *
+   * @return LoggerConfig *
    */
   LoggerConfig *get_config() const { return config_; }
 
