@@ -30,11 +30,20 @@ do-all-unit-tests:
 	${CMAKE} --build ${BUILD_DIR} -j8 -- --no-print-directory
 	cd ${BUILD_DIR} && ${CTEST} -j8 -T test --no-compress-output
 
-gen-doxygen: all-clang
+gen-doxygen:
+	${CMAKE} -S . -B ${BUILD_DIR} \
+			-DCMAKE_BUILD_TYPE=Debug \
+			-DCMAKE_C_COMPILER="clang" \
+			-DCMAKE_CXX_COMPILER="clang++" \
+			-DDOXYGEN_BUILD_ENABLED=ON
 	${CMAKE} --build ${BUILD_DIR} --target doxygen -- --no-print-directory
+	doxygen ${BUILD_DIR}/doxygen/Doxyfile
 
 do-clang-format-check:
 	@sh tools/check_clangformat.sh
+
+do-clang-format-run:
+	@sh tools/run_clangformat.sh
 
 clean:
 	rm -rf ${BUILD_DIR}

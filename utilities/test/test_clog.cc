@@ -11,31 +11,16 @@ static const char *cCLoggerName{"TestClog"};
 
 class TestClog : public qle::TestFixture {
  protected:
-  void SetUp() { qle::CLogger::set_log_level(qle::LogLevel::TRACE); }
-  void TearDown() { qle::CLogger::set_log_level(qle::LogLevel::TRACE); }
+  void SetUp() override {}
 
   std::mutex &mtx_ = qle::TestFixture::mtx_;
 };
 
-TEST_F(TestClog, SetLogLevel) {
-  std::array<int, 4> invalid_levels{-100, -1, qle::LogLevel::DISABLED + 1,
-                                    qle::LogLevel::DISABLED + 100};
-  std::array<int, 6> valid_levels{
-      qle::LogLevel::TRACE,   qle::LogLevel::DEBUG, qle::LogLevel::INFO,
-      qle::LogLevel::WARNING, qle::LogLevel::ERROR, qle::LogLevel::DISABLED};
-
-  for (auto &level : invalid_levels) {
-    ASSERT_FALSE(qle::CLogger::set_log_level(qle::LogLevel::Level(level)));
-  }
-
-  for (auto &level : valid_levels) {
-    ASSERT_TRUE(qle::CLogger::set_log_level(qle::LogLevel::Level(level)));
-  }
-}
-
 TEST_F(TestClog, LogVariousLevels) {
   std::lock_guard<std::mutex> guard(mtx_);
 
+  auto logger_cfg_handler =
+      std::make_unique<qle::LoggerConfigHandler>(qle::LogLevel::TRACE);
   auto logger = std::make_unique<qle::CLogger>(cCLoggerName);
   const char *msg{"Sample text"};
 
@@ -77,6 +62,8 @@ TEST_F(TestClog, LogVariousLevels) {
 TEST_F(TestClog, LogMultipleTimes) {
   std::lock_guard<std::mutex> guard(mtx_);
 
+  auto logger_cfg_handler =
+      std::make_unique<qle::LoggerConfigHandler>(qle::LogLevel::TRACE);
   auto logger = std::make_unique<qle::CLogger>(cCLoggerName);
   const char *msg{"Sample text"};
 
@@ -105,12 +92,14 @@ TEST_F(TestClog, LogMultipleTimes) {
 TEST_F(TestClog, LogHigherLevel) {
   std::lock_guard<std::mutex> guard(mtx_);
 
-  qle::CLogger::set_log_level(qle::LogLevel::WARNING);
-  auto logger = std::make_unique<qle::CLogger>(cCLoggerName);
   const char *msg{"Sample text"};
 
   /// If log level is WARNING, only log_warn() & log_error() output to stderr
   {
+    auto logger_cfg_handler =
+        std::make_unique<qle::LoggerConfigHandler>(qle::LogLevel::WARNING);
+    auto logger = std::make_unique<qle::CLogger>(cCLoggerName);
+
     // Expect NO log for log_trace, log_debug, log_info
     auto out =
         capture_output([&](const char *msg) { logger->trace(msg); }, msg);
@@ -137,8 +126,11 @@ TEST_F(TestClog, LogHigherLevel) {
   }
 
   /// If log level is ERROR, only log_error() outputs to stderr
-  qle::CLogger::set_log_level(qle::LogLevel::ERROR);
   {
+    auto logger_cfg_handler =
+        std::make_unique<qle::LoggerConfigHandler>(qle::LogLevel::ERROR);
+    auto logger = std::make_unique<qle::CLogger>(cCLoggerName);
+
     // Expect NO Log warn returned
     auto out = capture_output([&](const char *msg) { logger->warn(msg); }, msg);
     EXPECT_EQ(out["stderr"], "");
@@ -151,8 +143,11 @@ TEST_F(TestClog, LogHigherLevel) {
   }
 
   /// If log level is DISABLED, no log to stderr / stdout is active
-  qle::CLogger::set_log_level(qle::LogLevel::DISABLED);
   {
+    auto logger_cfg_handler =
+        std::make_unique<qle::LoggerConfigHandler>(qle::LogLevel::DISABLED);
+    auto logger = std::make_unique<qle::CLogger>(cCLoggerName);
+
     // Expect NO Log error returned
     auto out =
         capture_output([&](const char *msg) { logger->error(msg); }, msg);
@@ -163,6 +158,8 @@ TEST_F(TestClog, LogHigherLevel) {
 TEST_F(TestClog, LogComplexFormat) {
   std::lock_guard<std::mutex> guard(mtx_);
 
+  auto logger_cfg_handler =
+      std::make_unique<qle::LoggerConfigHandler>(qle::LogLevel::TRACE);
   auto logger = std::make_unique<qle::CLogger>(cCLoggerName);
   int tmp = 0;
   const char *format{"{} {} {} {}"};

@@ -5,7 +5,7 @@
 #include <cstdio>
 #include <mutex>
 
-#include <utilities/log_level.h>
+#include <utilities/log_config.h>
 
 namespace qle {
 
@@ -45,27 +45,14 @@ class Logger {
    * @param logger_name Logger name
    */
   explicit Logger(const char *logger_name) noexcept
-      : logger_name_(logger_name) {}
+      : logger_name_(logger_name) {
+    logger_config_ = LoggerConfig::create();
+  }
 
   /**
    * @brief Destroy the Logger object
    */
   ~Logger() = default;
-
-  /**
-   * @brief Set the log level
-   *
-   * @param log_level log level
-   * @return true/false
-   */
-  static bool set_log_level(LogLevel::Level log_level) {
-    if (!LogLevel::is_valid_log_level(log_level)) {
-      return false;
-    }
-    std::lock_guard<std::mutex> guard(mutex_log_level_);
-    log_level_ = log_level;
-    return true;
-  }
 
   /**
    * @brief Log trace to stdout
@@ -139,43 +126,10 @@ class Logger {
    * @param level Log level
    * @param message Log message
    */
-  void log(LogLevel::Level level, const char *format, va_list args) noexcept {
-    if (!LogLevel::is_valid_log_level(level)) {
-      return;
-    }
+  void log(LogLevel::Level level, const char *format, va_list args) noexcept;
 
-    if (level < log_level_) {
-      return;
-    }
-
-    char log_msg[1024]{};
-    vsnprintf(log_msg, sizeof(log_msg), format, args);
-
-    char full_log_msg[1024]{};
-    snprintf(full_log_msg, sizeof(full_log_msg), "[%s] %s: %s",
-             LogLevel::log_level_to_string(level), logger_name_, log_msg);
-
-    std::lock_guard<std::mutex> guard(mutex_log_);
-    switch (level) {
-      case LogLevel::TRACE:
-      case LogLevel::DEBUG:
-      case LogLevel::INFO:
-        fprintf(stdout, "%s\n", full_log_msg);
-        break;
-      case LogLevel::WARNING:
-      case LogLevel::ERROR:
-        fprintf(stderr, "%s\n", full_log_msg);
-        break;
-      case LogLevel::DISABLED:
-      default:
-        return;
-    }
-  }
-
-  const char *logger_name_;            ///< Logger name
-  std::mutex mutex_log_;               ///< Mutex logging
-  static std::mutex mutex_log_level_;  ///< Mutex log_level
-  static LogLevel::Level log_level_;   ///< Log level
+  const char *logger_name_;               ///< Logger name
+  LoggerConfig *logger_config_{nullptr};  ///< Logger config
 };
 
 }  // namespace qle
