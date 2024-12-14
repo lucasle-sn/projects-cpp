@@ -183,8 +183,6 @@ class LoggerConfigHandler {
    *
    * @param loglevel Log level
    * @param logfile Log file
-   *
-   * @return An instance of LoggerConfigHandler
    */
   LoggerConfigHandler(LogLevel::Level loglevel = LogLevel::INFO,
                       const char *logfile = nullptr) {
