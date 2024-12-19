@@ -7,7 +7,7 @@ BUILD_DIR=${BUILD_DIR_PARENT}/${BUILD_TYPE}/${C_COMPILER}
 FILES=$(shell find . -not -path "./third_party/*" -not -path "./build/*" \( -name '*.cc' -o -name '*.c' -o -name '*.h' \))
 TMPFILE=./formatted_file
 
-.PHONY: build all clean do-all-unit-tests gen-doxygen do-clang-format-check
+.PHONY: build all clean do-all-unit-tests gen-doxygen do-clang-format-check do-clang-format-run
 
 build:
 	@cmake -S . -B ${BUILD_DIR} \
